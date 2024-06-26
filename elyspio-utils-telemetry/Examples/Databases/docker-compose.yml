@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+    mssql:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        container_name: coexya-utils-telemetry-sql
+        environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=yourStrong(!)Password
+        ports:
+            - "1435:1433"
+        volumes:
+            - ./sql:/var/opt/mssql/data
+
+    mongo:
+        image: mongo:latest
+        container_name: coexya-utils-telemetry-mongo
+        ports:
+            - "27017:27017"
+        volumes:
+            - ./mongo:/data/db
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=root
+
+    rabbitmq:
+        image: rabbitmq:3
+        container_name: coexya-utils-telemetry-rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - "./rabbitmq/data/:/var/lib/rabbitmq/"
+            - "./rabbitmq/log/:/var/log/rabbitmq"
+
+    redis:
+        image: redis
+        container_name: coexya-utils-telemetry-redis
+        ports:
+            - "6379:6379"

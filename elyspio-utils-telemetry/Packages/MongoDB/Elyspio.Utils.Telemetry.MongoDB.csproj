@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PackageId>Elyspio.Utils.Telemetry.MongoDB</PackageId>
+		<Version>1.0.0</Version>
+		<PackageDescription>Bootstrap OpenTelemetry instrumentation/exporter</PackageDescription>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MongoDB.Driver.Core" Version="2.26.0" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.9.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\readme.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Core\Elyspio.Utils.Telemetry.csproj" />
+	</ItemGroup>
+
+</Project>

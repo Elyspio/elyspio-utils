@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MassTransit.RabbitMQ" Version="8.2.2"/>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1"/>
+		<PackageReference Include="MongoDB.Driver" Version="2.26.0" />
+		<PackageReference Include="Mapster" Version="7.4.0"/>
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.6" />
+	</ItemGroup>
+	<PropertyGroup>
+		<InvariantGlobalization>false</InvariantGlobalization>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<Folder Include="Abstractions\"/>
+		<Folder Include="Repositories\"/>
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <None Update="Certs\*">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Packages\Core\Elyspio.Utils.Telemetry.csproj" />
+	  <ProjectReference Include="..\..\Packages\MassTransit\Elyspio.Utils.Telemetry.MassTransit.csproj" />
+	  <ProjectReference Include="..\..\Packages\MongoDB\Elyspio.Utils.Telemetry.MongoDB.csproj" />
+	  <ProjectReference Include="..\..\Packages\Redis\Elyspio.Utils.Telemetry.Redis.csproj" />
+	  <ProjectReference Include="..\..\Packages\Sql\Elyspio.Utils.Telemetry.Sql.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry", "Packages\Core\Elyspio.Utils.Telemetry.csproj", "{40B8CC3F-9585-4B3D-86FF-A192D212A30F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry.Sql", "Packages\Sql\Elyspio.Utils.Telemetry.Sql.csproj", "{2000ADE8-C9C7-44C2-A8AA-79D6FA9C2AE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry.Redis", "Packages\Redis\Elyspio.Utils.Telemetry.Redis.csproj", "{C6C27295-740F-40B5-917A-0513600B9892}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry.MongoDB", "Packages\MongoDB\Elyspio.Utils.Telemetry.MongoDB.csproj", "{465F3EC5-48D2-4440-8F42-E94490DA3AAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry.MassTransit", "Packages\MassTransit\Elyspio.Utils.Telemetry.MassTransit.csproj", "{57922DC9-6FE0-48B7-8625-1C5F5AF2AE99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{64AF6D39-4BA4-4634-B485-A5645ABB0270}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elyspio.Utils.Telemetry.Examples.WebApi", "Examples\WebApi\Elyspio.Utils.Telemetry.Examples.WebApi.csproj", "{C05D2000-B925-45DD-AD39-87CA1E8C0A1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{EE270DC1-A20C-4B57-BA75-0D8122F51822}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{57922DC9-6FE0-48B7-8625-1C5F5AF2AE99} = {64AF6D39-4BA4-4634-B485-A5645ABB0270}
+		{465F3EC5-48D2-4440-8F42-E94490DA3AAE} = {64AF6D39-4BA4-4634-B485-A5645ABB0270}
+		{C6C27295-740F-40B5-917A-0513600B9892} = {64AF6D39-4BA4-4634-B485-A5645ABB0270}
+		{2000ADE8-C9C7-44C2-A8AA-79D6FA9C2AE0} = {64AF6D39-4BA4-4634-B485-A5645ABB0270}
+		{C05D2000-B925-45DD-AD39-87CA1E8C0A1A} = {EE270DC1-A20C-4B57-BA75-0D8122F51822}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40B8CC3F-9585-4B3D-86FF-A192D212A30F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40B8CC3F-9585-4B3D-86FF-A192D212A30F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40B8CC3F-9585-4B3D-86FF-A192D212A30F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{57922DC9-6FE0-48B7-8625-1C5F5AF2AE99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57922DC9-6FE0-48B7-8625-1C5F5AF2AE99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57922DC9-6FE0-48B7-8625-1C5F5AF2AE99}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{465F3EC5-48D2-4440-8F42-E94490DA3AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{465F3EC5-48D2-4440-8F42-E94490DA3AAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{465F3EC5-48D2-4440-8F42-E94490DA3AAE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C6C27295-740F-40B5-917A-0513600B9892}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6C27295-740F-40B5-917A-0513600B9892}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6C27295-740F-40B5-917A-0513600B9892}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2000ADE8-C9C7-44C2-A8AA-79D6FA9C2AE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2000ADE8-C9C7-44C2-A8AA-79D6FA9C2AE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2000ADE8-C9C7-44C2-A8AA-79D6FA9C2AE0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C05D2000-B925-45DD-AD39-87CA1E8C0A1A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{C05D2000-B925-45DD-AD39-87CA1E8C0A1A}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{C05D2000-B925-45DD-AD39-87CA1E8C0A1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C05D2000-B925-45DD-AD39-87CA1E8C0A1A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

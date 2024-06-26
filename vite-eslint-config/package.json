@@ -1,0 +1,25 @@
+{
+	"name": "@elyspio/vite-eslint-config",
+	"license": "MIT",
+	"version": "0.0.0",
+	"scripts": {
+		"clean": "rimraf out-js out",
+		"copy-src": "cpx src/{.*,*} out/ && cpx src/vite/** out/src/",
+		"copy-js": "cpx out-js/src/vite/** out/lib/",
+		"pack": "yarn clean && yarn copy-src && tsc && yarn copy-js",
+		"prepack": "ts-node scripts/version.ts",
+		"publish": "yarn run pack && cd out && npm publish",
+		"test": "nodemon -w *.ts scripts/version.ts"
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.0",
+		"@types/semver": "^7.5.8",
+		"axios": "1.7.2",
+		"cpx": "^1.5.0",
+		"nodemon": "^3.1.2",
+		"rimraf": "^5.0.7",
+		"semver": "^7.6.2",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.4.5"
+	}
+}
