@@ -28,12 +28,12 @@ public class TodoController(ITodoService todoService, ILogger<TodoController> lo
 		return Created($"api/todo/{todo.Id}", todo);
 	}
 
-    /// <summary>
-    /// </summary>
-    /// <param name="idUser">Id user</param>
-    /// <param name="id">Id of the todo</param>
-    /// <returns></returns>
-    [HttpPut("{id:guid}/toggle")]
+	/// <summary>
+	/// </summary>
+	/// <param name="idUser">Id user</param>
+	/// <param name="id">Id of the todo</param>
+	/// <returns></returns>
+	[HttpPut("{id:guid}/toggle")]
 	[ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> Toggle(Guid idUser, Guid id)
 	{

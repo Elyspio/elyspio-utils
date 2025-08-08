@@ -10,13 +10,13 @@ namespace Elyspio.Utils.Telemetry.Sql.Extensions;
 /// </summary>
 public static class TracingInstrumentationExtension
 {
-    /// <summary>
-    ///     Add sql client instrumentation
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public static TracerProviderBuilder AddAppSqlClientInstrumentation(this TracerProviderBuilder builder, Action<SqlClientTraceInstrumentationOptions>? action = null)
+	/// <summary>
+	///     Add sql client instrumentation
+	/// </summary>
+	/// <param name="builder"></param>
+	/// <param name="action"></param>
+	/// <returns></returns>
+	public static TracerProviderBuilder AddAppSqlClientInstrumentation(this TracerProviderBuilder builder, Action<SqlClientTraceInstrumentationOptions>? action = null)
 	{
 		builder.AddSqlClientInstrumentation(o =>
 		{
@@ -31,7 +31,6 @@ public static class TracingInstrumentationExtension
 				var tables = SqlHelper.ExtractTablesFromQuery(command.CommandText.AsSpan());
 				tables.Sort();
 				activity.DisplayName = $"SQL - {command.Connection.Database} - {string.Join(", ", tables)} - {SqlHelper.ExtractCommandFromQuery(command.CommandText).ToString().ToUpperInvariant()}";
-
 			};
 			action?.Invoke(o);
 		});

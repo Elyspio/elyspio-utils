@@ -26,12 +26,12 @@ public static class CommandStartedEventHelper
 		"listIndexes"
 	];
 
-    /// <summary>
-    ///     Get the collection name from a command
-    /// </summary>
-    /// <param name="event"></param>
-    /// <returns></returns>
-    public static string? GetCollectionName(this CommandStartedEvent @event)
+	/// <summary>
+	///     Get the collection name from a command
+	/// </summary>
+	/// <param name="event"></param>
+	/// <returns></returns>
+	public static string? GetCollectionName(this CommandStartedEvent @event)
 	{
 		if (@event.CommandName == "getMore")
 		{

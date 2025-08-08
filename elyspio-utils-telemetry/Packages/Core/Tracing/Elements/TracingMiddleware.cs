@@ -17,16 +17,16 @@ public abstract class TracingMiddleware : TracingBase, ITracingMiddleware
 	{
 	}
 
-    /// <summary>
-    ///     Create a logger instance for a specific call
-    /// </summary>
-    /// <param name="arguments"></param>
-    /// <param name="method"></param>
-    /// <param name="fullFilePath"></param>
-    /// <param name="autoExit"></param>
-    /// <param name="logOnExit"></param>
-    /// <returns></returns>
-    protected Log.LoggerInstance LogMiddleware(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true,
+	/// <summary>
+	///     Create a logger instance for a specific call
+	/// </summary>
+	/// <param name="arguments"></param>
+	/// <param name="method"></param>
+	/// <param name="fullFilePath"></param>
+	/// <param name="autoExit"></param>
+	/// <param name="logOnExit"></param>
+	/// <returns></returns>
+	protected Log.LoggerInstance LogMiddleware(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true,
 		bool logOnExit = true)
 	{
 		return LogInternal(arguments, LogLevel.Debug, method, fullFilePath, autoExit, logOnExit,

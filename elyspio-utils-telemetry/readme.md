@@ -4,7 +4,6 @@ Ce package permet d'ajouter des informations de télémétrie dans une applicati
 
 ## Installation
 
-
 ```bash
 dotnet add package Elyspio.Utils.Telemetry
 dotnet add package Elyspio.Utils.Telemetry.MongoDB

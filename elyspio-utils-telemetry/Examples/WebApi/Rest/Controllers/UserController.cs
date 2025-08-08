@@ -1,5 +1,4 @@
 ﻿using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
-using Elyspio.Utils.Telemetry.Examples.WebApi.ApiSante.Rest;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Transports;
 using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Tracing.Elements;
@@ -11,14 +10,6 @@ namespace Elyspio.Utils.Telemetry.Examples.WebApi.Rest.Controllers;
 [ApiController]
 public class UserController(IUserService userService, ILogger<UserController> logger) : TracingController(logger)
 {
-	[HttpGet("search")]
-	[ProducesResponseType(typeof(List<UtilisateurActeurLight>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> Search(string prenomNom)
-	{
-		using var _ = LogController($"{Log.F(prenomNom)}");
-		return Ok(await userService.SearchPs(prenomNom));
-	}
-
 	[HttpGet]
 	[ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAll()

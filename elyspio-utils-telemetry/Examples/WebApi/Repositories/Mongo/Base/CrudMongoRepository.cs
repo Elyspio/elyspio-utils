@@ -4,6 +4,7 @@ using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Mapster;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Mongo.Base;
 

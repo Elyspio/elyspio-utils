@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 using Coexya.Utils.Telemetry.Examples.WebApi.Services;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
-using Elyspio.Utils.Telemetry.Examples.WebApi.ApiSante.Rest;
 using Elyspio.Utils.Telemetry.Examples.WebApi.MassTransit.Consumers;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Mongo;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Sql;
@@ -32,13 +31,8 @@ builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 
-builder.Services.AddHttpClient<ApiSanteRestClient>();
-
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o =>
-{
-	o.CustomOperationIds(op => op.ActionDescriptor.RouteValues["controller"] + op.ActionDescriptor.RouteValues["action"]);
-});
+builder.Services.AddSwaggerGen(o => { o.CustomOperationIds(op => op.ActionDescriptor.RouteValues["controller"] + op.ActionDescriptor.RouteValues["action"]); });
 
 
 builder.Services.AddMassTransit(x =>
@@ -60,10 +54,7 @@ builder.Services.AddScoped<FakeMiddleware>();
 
 builder.Services
 	.AddControllers(o => { o.Filters.Add<HttpExceptionActionFilter>(); })
-	.AddJsonOptions(o =>
-	{
-		o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-	});
+	.AddJsonOptions(o => { o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
 
 #region Redis
@@ -102,7 +93,6 @@ if (builder.Configuration.IsTelemetryEnabled(out var telemetryOptions))
 
 
 var app = builder.Build();
-
 
 
 app.UseSerilogRequestLogging();

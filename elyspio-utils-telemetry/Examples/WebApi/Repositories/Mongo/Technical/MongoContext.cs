@@ -21,11 +21,11 @@ public sealed class MongoContext
 		BsonSerializer.RegisterSerializationProvider(new EnumAsStringSerializationProvider());
 	}
 
-    /// <summary>
-    ///     Default constructor
-    /// </summary>
-    /// <param name="configuration"></param>
-    public MongoContext(IConfiguration configuration)
+	/// <summary>
+	///     Default constructor
+	/// </summary>
+	/// <param name="configuration"></param>
+	public MongoContext(IConfiguration configuration)
 	{
 		var connectionString = configuration["Mongo"]!;
 
@@ -45,9 +45,9 @@ public sealed class MongoContext
 
 	private static ConcurrentDictionary<string, IMongoDatabase> Databases { get; } = new();
 
-    /// <summary>
-    ///     Récupération de la IMongoDatabase
-    /// </summary>
-    /// <returns></returns>
-    public IMongoDatabase MongoDatabase { get; }
+	/// <summary>
+	///     Récupération de la IMongoDatabase
+	/// </summary>
+	/// <returns></returns>
+	public IMongoDatabase MongoDatabase { get; }
 }

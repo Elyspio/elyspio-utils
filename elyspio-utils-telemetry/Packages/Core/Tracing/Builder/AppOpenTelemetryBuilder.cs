@@ -40,50 +40,50 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 	}
 
 
-    /// <summary>
-    ///     Permet de configurer les options de l'instrumentation ASP.NET Core
-    /// </summary>
-    public Action<AspNetCoreTraceInstrumentationOptions>? AspNetCoreInstrumentation { get; set; }
+	/// <summary>
+	///     Permet de configurer les options de l'instrumentation ASP.NET Core
+	/// </summary>
+	public Action<AspNetCoreTraceInstrumentationOptions>? AspNetCoreInstrumentation { get; set; }
 
-    /// <summary>
-    ///     Permet de configurer les options de l'instrumentation des clients HTTP
-    /// </summary>
-    public Action<HttpClientTraceInstrumentationOptions>? HttpClientInstrumentation { get; set; }
+	/// <summary>
+	///     Permet de configurer les options de l'instrumentation des clients HTTP
+	/// </summary>
+	public Action<HttpClientTraceInstrumentationOptions>? HttpClientInstrumentation { get; set; }
 
-    /// <summary>
-    ///     Configure le tracing
-    /// </summary>
-    public Action<TracerProviderBuilder>? Tracing { get; set; }
+	/// <summary>
+	///     Configure le tracing
+	/// </summary>
+	public Action<TracerProviderBuilder>? Tracing { get; set; }
 
-    /// <summary>
-    ///     Configure les métriques
-    /// </summary>
-    public Action<MeterProviderBuilder>? Meter { get; set; }
+	/// <summary>
+	///     Configure les métriques
+	/// </summary>
+	public Action<MeterProviderBuilder>? Meter { get; set; }
 
-    /// <summary>
-    ///     Chemins à ignorer pour le tracing
-    /// </summary>
-    /// <example>
-    ///     Par défaut : /swagger
-    /// </example>
-    public string[] IgnorePaths { get; set; } =
+	/// <summary>
+	///     Chemins à ignorer pour le tracing
+	/// </summary>
+	/// <example>
+	///     Par défaut : /swagger
+	/// </example>
+	public string[] IgnorePaths { get; set; } =
 	[
 		"/swagger"
 	];
 
 
-    /// <summary>
-    ///     Métriques à ajouter
-    /// </summary>
-    public string[] Metters { get; set; } = [];
+	/// <summary>
+	///     Métriques à ajouter
+	/// </summary>
+	public string[] Metters { get; set; } = [];
 
 
-    /// <summary>
-    ///     Active le tracing dans les services de l'application
-    /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
-    public IOpenTelemetryBuilder Build(IServiceCollection services)
+	/// <summary>
+	///     Active le tracing dans les services de l'application
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
+	public IOpenTelemetryBuilder Build(IServiceCollection services)
 	{
 		if (_options.Debug == true) services.AddOpenTelemetryEventLogging();
 
@@ -182,16 +182,12 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 		o.Endpoint = new Uri(endpointUrl);
 
 		if (_options.Authentication is not null)
-		{
 			o.HttpClientFactory = () =>
 			{
 				var certificate = X509Certificate2.CreateFromPemFile(_options.Authentication.CertificatePemPath, _options.Authentication.CertificateKeyPath);
 
 				// Windows ne gère pas les certificats PEM donc on les convertit en PFX
-				if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-				{
-					certificate = new X509Certificate2(certificate.Export(X509ContentType.Pfx));
-				}
+				if (Environment.OSVersion.Platform == PlatformID.Win32NT) certificate = X509CertificateLoader.LoadCertificate(certificate.Export(X509ContentType.Pfx));
 
 				var handler = new HttpClientHandler
 				{
@@ -199,12 +195,11 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 					{
 						certificate
 					},
-					ServerCertificateCustomValidationCallback = ValidateCertificate,
+					ServerCertificateCustomValidationCallback = ValidateCertificate
 				};
 				var client = new HttpClient(handler);
 				return client;
 			};
-		}
 	}
 
 	private bool ValidateCertificate(HttpRequestMessage message, X509Certificate2? cert, X509Chain? chain, SslPolicyErrors arg4)
@@ -213,7 +208,7 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 		if (chain == null) return false;
 
 		chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-		chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2(_options.Authentication!.CaPemPath));
+		chain.ChainPolicy.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(_options.Authentication!.CaPemPath));
 
 		return chain.Build(cert);
 	}

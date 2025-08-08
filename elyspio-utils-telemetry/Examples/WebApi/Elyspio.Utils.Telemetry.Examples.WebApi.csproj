@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<InvariantGlobalization>true</InvariantGlobalization>
@@ -9,15 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MassTransit.RabbitMQ" Version="8.2.2"/>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1"/>
-		<PackageReference Include="MongoDB.Driver" Version="2.26.0" />
+		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="MongoDB.Driver" Version="3.4.1" />
 		<PackageReference Include="Mapster" Version="7.4.0"/>
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.7" />
 	</ItemGroup>
 	<PropertyGroup>
 		<InvariantGlobalization>false</InvariantGlobalization>
@@ -45,6 +45,13 @@
 	  <ProjectReference Include="..\..\Packages\MongoDB\Elyspio.Utils.Telemetry.MongoDB.csproj" />
 	  <ProjectReference Include="..\..\Packages\Redis\Elyspio.Utils.Telemetry.Redis.csproj" />
 	  <ProjectReference Include="..\..\Packages\Sql\Elyspio.Utils.Telemetry.Sql.csproj" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="Connected Services\ApiSante.Rest\ApiSante.Rest.nswag.json" />
+	  <_ContentIncludedByDefault Remove="Connected Services\ApiSante.Rest\ConnectedService.json" />
 	</ItemGroup>
 
 </Project>

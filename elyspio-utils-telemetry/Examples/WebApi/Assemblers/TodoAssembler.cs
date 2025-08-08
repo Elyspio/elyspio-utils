@@ -1,5 +1,5 @@
-﻿using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Common.Extensions;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Common.Assemblers;
+﻿using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Common.Assemblers;
+using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Common.Extensions;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Entities;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Transports;
 

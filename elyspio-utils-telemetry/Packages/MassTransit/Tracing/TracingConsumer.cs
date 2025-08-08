@@ -11,11 +11,11 @@ namespace Elyspio.Utils.Telemetry.MassTransit.Tracing;
 /// <typeparam name="TMessage"></typeparam>
 public abstract class TracingConsumer<TMessage> : IConsumer<TMessage> where TMessage : class
 {
-    /// <summary>
-    ///     Consume the message with open telemetry context
-    /// </summary>
-    /// <param name="context"></param>
-    public Task Consume(ConsumeContext<TMessage> context)
+	/// <summary>
+	///     Consume the message with open telemetry context
+	/// </summary>
+	/// <param name="context"></param>
+	public Task Consume(ConsumeContext<TMessage> context)
 	{
 		MassTransitActivityHelper.SetActivityName<TMessage>(MassTransitOperation.Process);
 

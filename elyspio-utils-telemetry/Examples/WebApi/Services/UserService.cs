@@ -1,6 +1,5 @@
 ﻿using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
-using Elyspio.Utils.Telemetry.Examples.WebApi.ApiSante.Rest;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Assemblers;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Base;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Transports;
@@ -11,17 +10,14 @@ namespace Elyspio.Utils.Telemetry.Examples.WebApi.Services;
 
 public class UserService : TracingService, IUserService
 {
-	private readonly ApiSanteRestClient _apiSanteRestClient;
 	private readonly IRedisCacheService _cache;
 	private readonly UserAssembler _userAssembler = new();
 	private readonly IUserRepository _userRepository;
 
-	public UserService(ILogger<UserService> logger, IUserRepository userRepository, IRedisCacheService cache,
-		ApiSanteRestClient apiSanteRestClient) : base(logger)
+	public UserService(ILogger<UserService> logger, IUserRepository userRepository, IRedisCacheService cache) : base(logger)
 	{
 		_userRepository = userRepository;
 		_cache = cache;
-		_apiSanteRestClient = apiSanteRestClient;
 	}
 
 	public async Task Delete(Guid idUser)
@@ -81,17 +77,4 @@ public class UserService : TracingService, IUserService
 		return user.Username;
 	}
 
-	public async Task<IReadOnlyCollection<UtilisateurActeurLight>> SearchPs(string prenomNom)
-	{
-		using var _ = LogService($"{Log.F(prenomNom)}");
-
-		var user = await _apiSanteRestClient.Professionnels_FindPsByCriteriaAsync("slavy", new SearchRequestModel
-		{
-			NomsPrenom = prenomNom,
-			MaxResults = 10,
-			IdsTechAexclure = ArraySegment<string>.Empty
-		});
-
-		return user.ToList();
-	}
 }

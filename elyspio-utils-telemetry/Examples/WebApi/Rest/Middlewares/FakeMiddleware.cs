@@ -9,10 +9,10 @@ public class FakeMiddleware : TracingMiddleware, IMiddleware
 {
 	private static int I;
 
-    /// <summary>
-    ///     Constructeur du middleware
-    /// </summary>
-    public FakeMiddleware(ILogger<FakeMiddleware> logger) : base(logger)
+	/// <summary>
+	///     Constructeur du middleware
+	/// </summary>
+	public FakeMiddleware(ILogger<FakeMiddleware> logger) : base(logger)
 	{
 	}
 

@@ -37,13 +37,13 @@ public class TelemetryCaptureCache
 		{ CaptureComponent.Repository, false }
 	}.ToFrozenDictionary();
 
-    /// <summary>
-    ///     Met à jour les options de capture
-    /// </summary>
-    /// <param name="components"></param>
-    /// <param name="levels"></param>
-    /// <param name="http"></param>
-    public void Update(Dictionary<CaptureComponent, bool> components, Dictionary<CaptureLevel, bool> levels, Dictionary<CaptureHttp, bool> http)
+	/// <summary>
+	///     Met à jour les options de capture
+	/// </summary>
+	/// <param name="components"></param>
+	/// <param name="levels"></param>
+	/// <param name="http"></param>
+	public void Update(Dictionary<CaptureComponent, bool> components, Dictionary<CaptureLevel, bool> levels, Dictionary<CaptureHttp, bool> http)
 	{
 		Levels = levels.ToFrozenDictionary();
 		Http = http.ToFrozenDictionary();

@@ -1,7 +1,7 @@
 ﻿namespace Elyspio.Utils.Telemetry.Technical.Options.Auth;
 
 /// <summary>
-/// Configuration de l'authentification par certificat pour faire du mTLS
+///     Configuration de l'authentification par certificat pour faire du mTLS
 /// </summary>
 /// <param name="CertificatePemPath">Chemin vers le certificat .pem</param>
 /// <param name="CertificateKeyPath">Chemin vers la clé du certificat</param>

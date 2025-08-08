@@ -15,7 +15,7 @@ public sealed class MassTransitProcessor : BaseProcessor<Activity>
 	private readonly IOptionsMonitor<InstrumentationOptions> _optionsMonitor;
 
 	/// <summary>
-	///    Constructor
+	///     Constructor
 	/// </summary>
 	/// <param name="optionsMonitor"></param>
 	public MassTransitProcessor(IOptionsMonitor<InstrumentationOptions> optionsMonitor)

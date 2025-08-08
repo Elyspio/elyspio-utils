@@ -16,10 +16,10 @@ public sealed class MongoDbActivityEventSubscriber : IEventSubscriber
 	private const string ActivityName = "MongoDB.Driver.Core.Events.Command";
 	private static readonly AssemblyName AssemblyName = typeof(MongoDbActivityEventSubscriber).Assembly.GetName();
 
-    /// <summary>
-    ///     The name of the activity source.
-    /// </summary>
-    public static readonly string ActivitySourceName = AssemblyName.Name!;
+	/// <summary>
+	///     The name of the activity source.
+	/// </summary>
+	public static readonly string ActivitySourceName = AssemblyName.Name!;
 
 	private static readonly Version Version = AssemblyName.Version!;
 	private static readonly ActivitySource ActivitySource = new(ActivitySourceName, Version.ToString());
@@ -31,22 +31,22 @@ public sealed class MongoDbActivityEventSubscriber : IEventSubscriber
 	{
 	}
 
-    /// <summary>
-    ///     Create a new instance of <see cref="MongoDbActivityEventSubscriber" />
-    /// </summary>
-    /// <param name="options"></param>
-    public MongoDbActivityEventSubscriber(MongoInstrumentationOptions options)
+	/// <summary>
+	///     Create a new instance of <see cref="MongoDbActivityEventSubscriber" />
+	/// </summary>
+	/// <param name="options"></param>
+	public MongoDbActivityEventSubscriber(MongoInstrumentationOptions options)
 	{
 		_options = options;
 	}
 
-    /// <summary>
-    ///     Subscribe to mongodb events
-    /// </summary>
-    /// <param name="handler"></param>
-    /// <typeparam name="TEvent"></typeparam>
-    /// <returns></returns>
-    public bool TryGetEventHandler<TEvent>(out Action<TEvent> handler)
+	/// <summary>
+	///     Subscribe to mongodb events
+	/// </summary>
+	/// <param name="handler"></param>
+	/// <typeparam name="TEvent"></typeparam>
+	/// <returns></returns>
+	public bool TryGetEventHandler<TEvent>(out Action<TEvent> handler)
 	{
 		if (typeof(TEvent) == typeof(CommandStartedEvent))
 		{

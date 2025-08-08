@@ -13,29 +13,29 @@ public abstract class BaseRepository<T> : TracingRepository
 	private readonly string _collectionName;
 	private readonly MongoContext _context;
 
-    /// <summary>
-    ///     Default constructor
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <param name="logger"></param>
-    protected BaseRepository(IConfiguration configuration, ILogger logger) : base(logger)
+	/// <summary>
+	///     Default constructor
+	/// </summary>
+	/// <param name="configuration"></param>
+	/// <param name="logger"></param>
+	protected BaseRepository(IConfiguration configuration, ILogger logger) : base(logger)
 	{
 		_context = new MongoContext(configuration);
 		_collectionName = typeof(T).Name[..^"Entity".Length];
 	}
 
-    /// <summary>
-    ///     Implementation of the collection
-    /// </summary>
-    protected IMongoCollection<T> EntityCollection => _context.MongoDatabase.GetCollection<T>(_collectionName);
+	/// <summary>
+	///     Implementation of the collection
+	/// </summary>
+	protected IMongoCollection<T> EntityCollection => _context.MongoDatabase.GetCollection<T>(_collectionName);
 
 
-    /// <summary>
-    ///     Create an index for this collection
-    /// </summary>
-    /// <param name="properties"></param>
-    /// <param name="unique"></param>
-    protected void CreateIndexIfMissing(ICollection<string> properties, bool unique = false)
+	/// <summary>
+	///     Create an index for this collection
+	/// </summary>
+	/// <param name="properties"></param>
+	/// <param name="unique"></param>
+	protected void CreateIndexIfMissing(ICollection<string> properties, bool unique = false)
 	{
 		var indexName = string.Join("-", properties);
 		var indexes = EntityCollection.Indexes.List().ToList();

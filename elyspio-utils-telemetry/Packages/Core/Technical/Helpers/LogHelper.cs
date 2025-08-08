@@ -15,10 +15,10 @@ namespace Elyspio.Utils.Telemetry.Technical.Helpers;
 /// </summary>
 public static class Log
 {
-    /// <summary>
-    ///     Custom JSON serializer options with enum as string.
-    /// </summary>
-    private static readonly JsonSerializerOptions Options = new()
+	/// <summary>
+	///     Custom JSON serializer options with enum as string.
+	/// </summary>
+	private static readonly JsonSerializerOptions Options = new()
 	{
 		Converters =
 		{
@@ -26,28 +26,28 @@ public static class Log
 		}
 	};
 
-    /// <summary>
-    ///     Formats a named value as a JSON string.
-    /// </summary>
-    public static string F<T>(T? value, [CallerArgumentExpression("value")] string name = "")
+	/// <summary>
+	///     Formats a named value as a JSON string.
+	/// </summary>
+	public static string F<T>(T? value, [CallerArgumentExpression("value")] string name = "")
 	{
 		return $"{name}={Stringify(value)}";
 	}
 
-    /// <summary>
-    ///     Formats a named value as a JSON string.
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static string Stringify<T>(T? value)
+	/// <summary>
+	///     Formats a named value as a JSON string.
+	/// </summary>
+	/// <param name="value"></param>
+	/// <returns></returns>
+	public static string Stringify<T>(T? value)
 	{
 		return JsonSerializer.Serialize(value, Options);
 	}
 
-    /// <summary>
-    ///     Creates a new instance of the LoggerInstance class for method logging.
-    /// </summary>
-    public static LoggerInstance Enter(this ILogger logger, string arguments = "", LogLevel level = LogLevel.Debug, Activity? activity = null,
+	/// <summary>
+	///     Creates a new instance of the LoggerInstance class for method logging.
+	/// </summary>
+	public static LoggerInstance Enter(this ILogger logger, string arguments = "", LogLevel level = LogLevel.Debug, Activity? activity = null,
 		[CallerMemberName] string method = "", bool autoExit = true, string className = "", bool logOnExit = true, [CallerFilePath] string filepath = "")
 	{
 		if (string.IsNullOrWhiteSpace(className)) className = GetClassNameFromFilepath(filepath);
@@ -55,10 +55,10 @@ public static class Log
 		return new LoggerInstance(logger, method, arguments, level, activity, autoExit, className, logOnExit);
 	}
 
-    /// <summary>
-    ///     Extracts class name from the provided filepath.
-    /// </summary>
-    public static string GetClassNameFromFilepath(string fullFilePath)
+	/// <summary>
+	///     Extracts class name from the provided filepath.
+	/// </summary>
+	public static string GetClassNameFromFilepath(string fullFilePath)
 	{
 		// On récupère le nom du fichier
 		var filePath = fullFilePath[fullFilePath.LastIndexOf(Path.DirectorySeparatorChar)..];
@@ -68,10 +68,10 @@ public static class Log
 	}
 
 
-    /// <summary>
-    ///     Encapsulates a logging session, providing methods to record specific events and messages.
-    /// </summary>
-    public sealed class LoggerInstance : IDisposable
+	/// <summary>
+	///     Encapsulates a logging session, providing methods to record specific events and messages.
+	/// </summary>
+	public sealed class LoggerInstance : IDisposable
 	{
 		private readonly string? _arguments;
 		private readonly bool _autoExit;
@@ -82,18 +82,18 @@ public static class Log
 		private readonly string _method;
 		private readonly long _startedAt = Stopwatch.GetTimestamp();
 
-        /// <summary>
-        ///     Creates a new instance of the LoggerInstance class.
-        /// </summary>
-        /// <param name="logger">The logger to be used.</param>
-        /// <param name="method">The method to be logged.</param>
-        /// <param name="arguments">The arguments to be logged.</param>
-        /// <param name="level">The level of log to be captured.</param>
-        /// <param name="activity">Optional activity to correlate logger messages.</param>
-        /// <param name="autoExit">True if the log must automatically exit when disposed.</param>
-        /// <param name="className">The class name where the logger is used.</param>
-        /// <param name="logOnExit">True if the log must automatically exit when disposed.</param>
-        public LoggerInstance(ILogger logger, string method, string? arguments, LogLevel level, Activity? activity = null, bool autoExit = true, string className = "",
+		/// <summary>
+		///     Creates a new instance of the LoggerInstance class.
+		/// </summary>
+		/// <param name="logger">The logger to be used.</param>
+		/// <param name="method">The method to be logged.</param>
+		/// <param name="arguments">The arguments to be logged.</param>
+		/// <param name="level">The level of log to be captured.</param>
+		/// <param name="activity">Optional activity to correlate logger messages.</param>
+		/// <param name="autoExit">True if the log must automatically exit when disposed.</param>
+		/// <param name="className">The class name where the logger is used.</param>
+		/// <param name="logOnExit">True if the log must automatically exit when disposed.</param>
+		public LoggerInstance(ILogger logger, string method, string? arguments, LogLevel level, Activity? activity = null, bool autoExit = true, string className = "",
 			bool logOnExit = true)
 		{
 			_level = level;
@@ -109,27 +109,27 @@ public static class Log
 			Enter();
 		}
 
-        /// <summary>
-        ///     Current activity
-        /// </summary>
-        // ReSharper disable once MemberCanBePrivate.Global - Exported for applications' use
+		/// <summary>
+		///     Current activity
+		/// </summary>
+		// ReSharper disable once MemberCanBePrivate.Global - Exported for applications' use
 		public Activity? Activity { get; }
 
 
-        /// <summary>
-        ///     Releases associated resources and call <see cref="Exit" /> if <see cref="_autoExit" /> is enabled
-        /// </summary>
-        public void Dispose()
+		/// <summary>
+		///     Releases associated resources and call <see cref="Exit" /> if <see cref="_autoExit" /> is enabled
+		/// </summary>
+		public void Dispose()
 		{
 			if (_autoExit) Exit();
 			Activity?.Dispose();
 		}
 
 
-        /// <summary>
-        ///     Logs an "entering method" message.
-        /// </summary>
-        private void Enter()
+		/// <summary>
+		///     Logs an "entering method" message.
+		/// </summary>
+		private void Enter()
 		{
 			if (!_logger.IsEnabled(_level)) return;
 			var sb = new StringBuilder($"{_className}.{_method} -- Enter");
@@ -145,10 +145,10 @@ public static class Log
 		}
 
 
-        /// <summary>
-        ///     Logs an "exiting method" message.
-        /// </summary>
-        public void Exit(string? content = null)
+		/// <summary>
+		///     Logs an "exiting method" message.
+		/// </summary>
+		public void Exit(string? content = null)
 		{
 			if (!_logger.IsEnabled(_level) || !_logOnExit) return;
 			var sb = new StringBuilder($"{_className}.{_method} -- Exit");
@@ -169,10 +169,10 @@ public static class Log
 		}
 
 
-        /// <summary>
-        ///     Logs an error message.
-        /// </summary>
-        public void Error(string content)
+		/// <summary>
+		///     Logs an error message.
+		/// </summary>
+		public void Error(string content)
 		{
 			var sb = new StringBuilder($"{_className}.{_method}");
 			if (_arguments?.Length > 0) sb.Append($" -- {_arguments}");
@@ -183,10 +183,10 @@ public static class Log
 			_logger.LogError(sb.ToString());
 		}
 
-        /// <summary>
-        ///     Logs an error message with an exception.
-        /// </summary>
-        public void Error(Exception e, string content)
+		/// <summary>
+		///     Logs an error message with an exception.
+		/// </summary>
+		public void Error(Exception e, string content)
 		{
 			var sb = new StringBuilder($"{_className}.{_method}");
 			if (_arguments?.Length > 0) sb.Append($" -- {_arguments}");
@@ -197,10 +197,10 @@ public static class Log
 			_logger.LogError(e, sb.ToString());
 		}
 
-        /// <summary>
-        ///     Logs a warning message.
-        /// </summary>
-        public void Warn(string content)
+		/// <summary>
+		///     Logs a warning message.
+		/// </summary>
+		public void Warn(string content)
 		{
 			var sb = new StringBuilder($"{_className}.{_method} -- {content}");
 
@@ -210,10 +210,10 @@ public static class Log
 			_logger.LogWarning(sb.ToString());
 		}
 
-        /// <summary>
-        ///     Logs a information message.
-        /// </summary>
-        public void Info(string content)
+		/// <summary>
+		///     Logs a information message.
+		/// </summary>
+		public void Info(string content)
 		{
 			var sb = new StringBuilder($"{_className}.{_method} -- {content}");
 
@@ -223,10 +223,10 @@ public static class Log
 		}
 
 
-        /// <summary>
-        ///     Logs a debug message.
-        /// </summary>
-        public void Debug(string content)
+		/// <summary>
+		///     Logs a debug message.
+		/// </summary>
+		public void Debug(string content)
 		{
 			if (Activity is not null && TracingContext.OpenTelemetryOptions.CaptureCache.Levels[CaptureLevel.Debug]) AddLogToActivity(LogLevel.Debug, content);
 
@@ -239,13 +239,13 @@ public static class Log
 		}
 
 
-        /// <summary>
-        ///     Ajout un log à l'activity courante
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="content"></param>
-        /// <param name="exception"></param>
-        private void AddLogToActivity(LogLevel level, string content, Exception? exception = null)
+		/// <summary>
+		///     Ajout un log à l'activity courante
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="content"></param>
+		/// <param name="exception"></param>
+		private void AddLogToActivity(LogLevel level, string content, Exception? exception = null)
 		{
 			if (Activity is null) return;
 

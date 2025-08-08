@@ -13,10 +13,10 @@ namespace Elyspio.Utils.Telemetry.Tracing.Elements;
 /// with tracing context
 public abstract class TracingController : ControllerBase, ITracingContext, ITracingController
 {
-    /// <summary>
-    ///     A logger for this class
-    /// </summary>
-    protected readonly ILogger _logger;
+	/// <summary>
+	///     A logger for this class
+	/// </summary>
+	protected readonly ILogger _logger;
 
 	private readonly string _sourceName;
 
@@ -32,15 +32,15 @@ public abstract class TracingController : ControllerBase, ITracingContext, ITrac
 	private ActivitySource ActivitySource => TracingContext.GetActivitySource(_sourceName);
 
 
-    /// <summary>
-    ///     Create a logger instance for a specific call
-    /// </summary>
-    /// <param name="arguments"></param>
-    /// <param name="method"></param>
-    /// <param name="fullFilePath"></param>
-    /// <param name="autoExit"></param>
-    /// <returns></returns>
-    protected Log.LoggerInstance LogController(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true)
+	/// <summary>
+	///     Create a logger instance for a specific call
+	/// </summary>
+	/// <param name="arguments"></param>
+	/// <param name="method"></param>
+	/// <param name="fullFilePath"></param>
+	/// <param name="autoExit"></param>
+	/// <returns></returns>
+	protected Log.LoggerInstance LogController(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true)
 	{
 		method = TracingContext.GetMethodName(method);
 

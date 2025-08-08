@@ -21,23 +21,23 @@ public abstract class TracingAttribute : Attribute, ITracingContext, ITracingAtt
 		TracingContext.AddSource(_sourceName);
 	}
 
-    /// <summary>
-    ///     A logger
-    /// </summary>
-    public abstract ILogger Logger { get; set; }
+	/// <summary>
+	///     A logger
+	/// </summary>
+	public abstract ILogger Logger { get; set; }
 
 	private ActivitySource ActivitySource => TracingContext.GetActivitySource(_sourceName);
 
 
-    /// <summary>
-    ///     Start a new Activity for this context
-    /// </summary>
-    /// <param name="arguments"></param>
-    /// <param name="method"></param>
-    /// <param name="fullFilePath"></param>
-    /// <param name="autoExit"></param>
-    /// <returns></returns>
-    protected Log.LoggerInstance LogAttribute(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true)
+	/// <summary>
+	///     Start a new Activity for this context
+	/// </summary>
+	/// <param name="arguments"></param>
+	/// <param name="method"></param>
+	/// <param name="fullFilePath"></param>
+	/// <param name="autoExit"></param>
+	/// <returns></returns>
+	protected Log.LoggerInstance LogAttribute(string arguments = "", [CallerMemberName] string method = "", [CallerFilePath] string fullFilePath = "", bool autoExit = true)
 	{
 		method = TracingContext.GetMethodName(method);
 
