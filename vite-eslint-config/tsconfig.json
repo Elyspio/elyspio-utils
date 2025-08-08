@@ -1,14 +1,14 @@
 {
 	"compilerOptions": {
 		"lib": [
-			"es2021",
+			"ES2022",
 			"esNext"
 		],
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"target": "ES2021",
-		"module": "CommonJS",
-		"moduleResolution": "Node",
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "nodenext",
 		"resolveJsonModule": true,
 		"outDir": "out-js",
 		"declaration": true

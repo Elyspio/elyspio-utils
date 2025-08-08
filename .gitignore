@@ -1,2 +1,5 @@
 ﻿deploy/configs/github.token
 .idea
+node_modules
+config-dist
+deploy/configs/nuget.token
