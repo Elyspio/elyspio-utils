@@ -1,4 +1,4 @@
-import react from "@vitejs/plugin-react-oxc";
+import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import tsconfig from "../tsconfig.json" with { type: "json" };
 import { type PluginOption, UserConfig } from "vite";
@@ -13,7 +13,15 @@ type GetConfigParams = {
 };
 
 export const getDefaultConfig = ({ basePath = __dirname, port = 3000 }: GetConfigParams): UserConfig => {
-	const plugins: PluginOption[] = [svgr(), react(), (mkcert as unknown as FnPlugin)()];
+	const plugins: PluginOption[] = [
+		svgr(),
+		react({
+			babel: {
+				plugins: ["babel-plugin-react-compiler"],
+			},
+		}),
+		(mkcert as unknown as FnPlugin)(),
+	];
 
 	return {
 		plugins,
