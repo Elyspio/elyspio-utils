@@ -1,9 +1,9 @@
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
-import tsconfig from "../tsconfig.json" with { type: "json" };
 import { type PluginOption, UserConfig } from "vite";
 import { convertPathToAlias } from "./internal.vite.js";
 import mkcert from "vite-plugin-mkcert";
+import tsconfig from "../tsconfig.json" with { type: "json" };
 
 type FnPlugin = () => PluginOption;
 
@@ -17,7 +17,7 @@ export const getDefaultConfig = ({ basePath = __dirname, port = 3000 }: GetConfi
 		svgr(),
 		react({
 			babel: {
-				plugins: ["babel-plugin-react-compiler"],
+				plugins: [["babel-plugin-react-compiler"]],
 			},
 		}),
 		(mkcert as unknown as FnPlugin)(),

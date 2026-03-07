@@ -47,4 +47,4 @@ async function main(version?: string) {
 
 //
 // // eslint-disable-next-line no-void
-void main();
+void main("3.1.28");

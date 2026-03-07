@@ -2,9 +2,7 @@ import { spawnSync } from "child_process";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
-export async function generateApi(url: string, dirname: string, tag: string) {
-	const outputFolder = path.resolve(dirname, "core", "apis", "generated");
-
+export async function generateApi(url: string, outputFolder: string, tag: string) {
 	if (fs.existsSync(outputFolder)) {
 		await fs.promises.rm(outputFolder, { recursive: true });
 	}
