@@ -34,5 +34,5 @@ public enum CaptureLevel
 	/// <summary>
 	///     Si les logs d'erreur sont capturés (attention, peut être sensible)
 	/// </summary>
-	Error = 32
+	Error = 32,
 }

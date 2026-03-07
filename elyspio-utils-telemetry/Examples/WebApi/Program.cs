@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Coexya.Utils.Telemetry.Examples.WebApi.Services;
+using Coexya.Utils.Telemetry.Tracing.Builder;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
 using Elyspio.Utils.Telemetry.Examples.WebApi.MassTransit.Consumers;
@@ -13,14 +14,13 @@ using Elyspio.Utils.Telemetry.MongoDB.Extensions;
 using Elyspio.Utils.Telemetry.Redis.Extensions;
 using Elyspio.Utils.Telemetry.Sql.Extensions;
 using Elyspio.Utils.Telemetry.Technical.Extensions;
-using Elyspio.Utils.Telemetry.Tracing.Builder;
 using MassTransit;
 using Serilog;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilogWithTelemetry();
 
 builder.Services.AddSqlServer<AppSqlContext>(builder.Configuration["Sql"]);
 
@@ -77,9 +77,9 @@ builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultipl
 
 if (builder.Configuration.IsTelemetryEnabled(out var telemetryOptions))
 {
-	var telemetryBuilder = new AppOpenTelemetryBuilder<Program>(telemetryOptions!)
+	var telemetryBuilder = new AppOpenTelemetryBuilder<Program>(telemetryOptions!, builder.Configuration)
 	{
-		Tracing = tracing => tracing
+		Tracing = (tracing, _) => tracing
 			.AddAppMongoInstrumentation()
 			.AddAppSqlClientInstrumentation()
 			.AddAppRedisInstrumentation()

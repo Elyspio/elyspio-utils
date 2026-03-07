@@ -20,18 +20,19 @@ public static class TracingInstrumentationExtension
 	{
 		builder.AddSqlClientInstrumentation(o =>
 		{
-			o.EnableConnectionLevelAttributes = true;
 			o.RecordException = true;
-			o.SetDbStatementForText = true;
-			o.SetDbStatementForStoredProcedure = true;
-			o.Enrich = (activity, _, arg3) =>
+
+			o.EnrichWithSqlCommand = (activity, o1) =>
 			{
-				if (arg3 is not SqlCommand command) return;
+				if (o1 is not SqlCommand command) return;
+
 
 				var tables = SqlHelper.ExtractTablesFromQuery(command.CommandText.AsSpan());
 				tables.Sort();
 				activity.DisplayName = $"SQL - {command.Connection.Database} - {string.Join(", ", tables)} - {SqlHelper.ExtractCommandFromQuery(command.CommandText).ToString().ToUpperInvariant()}";
+
 			};
+			
 			action?.Invoke(o);
 		});
 		return builder;

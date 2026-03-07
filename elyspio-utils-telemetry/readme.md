@@ -1,51 +1,61 @@
-﻿# Elyspio.Utils.Telemetry
+# Elyspio.Utils.Telemetry
 
-Ce package permet d'ajouter des informations de télémétrie dans une application dotnet 7+.
+`Elyspio.Utils.Telemetry` bootstraps OpenTelemetry tracing and metrics for ASP.NET Core applications.
+
+## Requirements
+
+- .NET 10 (`net10.0`)
 
 ## Installation
 
+Core package:
+
 ```bash
 dotnet add package Elyspio.Utils.Telemetry
+```
+
+Optional instrumentation packages:
+
+```bash
 dotnet add package Elyspio.Utils.Telemetry.MongoDB
 dotnet add package Elyspio.Utils.Telemetry.Sql
 dotnet add package Elyspio.Utils.Telemetry.Redis
 dotnet add package Elyspio.Utils.Telemetry.MassTransit
 ```
 
-## Utilisation
+## Quick start
 
-Depuis la version 0.11.0, ce package inclut `Sisra.Socle.Logs.dotNetCore`, afin de récupérer l'idFlux depuis le context serilog
+```csharp
+using Coexya.Utils.Telemetry.Tracing.Builder;
+using Elyspio.Utils.Telemetry.MassTransit.Extensions;
+using Elyspio.Utils.Telemetry.MongoDB.Extensions;
+using Elyspio.Utils.Telemetry.Redis.Extensions;
+using Elyspio.Utils.Telemetry.Sql.Extensions;
+using Elyspio.Utils.Telemetry.Technical.Extensions;
 
-### Activation dans l'application
+var builder = WebApplication.CreateBuilder(args);
 
-Dans le builder de l'application, il faut ajouter les services de télémétrie
-
-```csharp   
+builder.Host.UseSerilogWithTelemetry();
 
 if (builder.Configuration.IsTelemetryEnabled(out var telemetryOptions))
 {
-	var telemetryBuilder = new AppOpenTelemetryBuilder<Program>(telemetryOptions!)
+	var telemetryBuilder = new AppOpenTelemetryBuilder<Program>(telemetryOptions!, builder.Configuration)
 	{
-		Tracing = tracing => tracing
-			.AddAppMongoInstrumentation()                         // Elyspio.Utils.MongoDB
-			.AddAppSqlClientInstrumentation()                     // Elyspio.Utils.Sql
-			.AddAppRedisInstrumentation()                         // Elyspio.Utils.Redis
-			.AddAppMassTransitInstrumentation(),                  // Elyspio.Utils.MassTransit
-		Meter = meter => meter.AddAppMassTransitInstrumentation() // Elyspio.Utils.MassTransit
+		Tracing = (tracing, _) => tracing
+			.AddAppMongoInstrumentation()
+			.AddAppSqlClientInstrumentation()
+			.AddAppRedisInstrumentation()
+			.AddAppMassTransitInstrumentation(),
+		Meter = meter => meter.AddAppMassTransitInstrumentation()
 	};
+
 	telemetryBuilder.Build(builder.Services);
 }
 ```
 
-Une fois l'application builder créée, il faut activer les middlewares de Sisra.Socle.Logs.dotNetCore
+## MongoDB tracing
 
-```csharp
-app.UseSisraSocleLogs();
-```
-
-### Gestion des traces de MongoDB
-
-Pour avoir accès aux requêtes jouées dans Mongo il faut ajouter ce code lors de la création du client en plus d'utiliser l'extension `AddAppMongoInstrumentation`
+To capture MongoDB commands, subscribe `MongoDbActivityEventSubscriber` when creating the client:
 
 ```csharp
 var mongoUrl = new MongoUrl(connectionString);
@@ -56,48 +66,45 @@ clientSettings.ClusterConfigurator = cb => { cb.Subscribe(new MongoDbActivityEve
 var client = new MongoClient(clientSettings);
 ```
 
-### Gestion des traces des consumers MassTransit
+## MassTransit consumers
 
-Pour avoir accès aux messages consommés par MassTransit il faut faire hériter les consumers de la
-classe `TracingConsumer` et implementer la méthode `ConsumeAsync` (renommage de la méthode `Consume` de MassTransit)
-
-Exemple :
+To enrich consumer traces, inherit from `TracingConsumer<TMessage>` and implement `ConsumeAsync`:
 
 ```csharp
 using Elyspio.Utils.Telemetry.MassTransit.Tracing;
 using MassTransit;
 
-public class ToggleTodoConsumer(ITodoRepository todoRepository) : TracingConsumer<ToggleTodoMessage> // remplace  IConsumer<ToggleTodoMessage>
+public class ToggleTodoConsumer : TracingConsumer<ToggleTodoMessage>
 {
-	// Remplace public async Task Consume(ConsumeContext<ToggleTodoMessage> context)
 	protected override async Task ConsumeAsync(ConsumeContext<ToggleTodoMessage> context)
 	{
-		// Do something
+		// Process message
 	}
 }
-
 ```
 
-### Configuration
+## Configuration
 
-Dans le fichier appsettings.json, ajouter la section suivante :
+Add this section to `appsettings.json`:
 
-```json5
+```json
 {
-	"OpenTelemetry": {
-		// Obligatoire
-		"CollectorUri": "http://localhost:4318",
-		// Obligatoire
-		"Service": "aura-local-telemetry-webapi",
-		// Optionnel
-		"Version": "1.0.0",
-		// Optionnel par défaut Grpc
-		"Protocol": "HttpProtobuf",
-		// Optionnel
-		"Authentication": {
-			"CertificatePemPath": "./client.pem", // Certificat pour faire du mTLS
-			"CertificateKeyPath": "./client.key", // key du certificat pour faire du mTLS
-		}
-	}
+  "OpenTelemetry": {
+    "CollectorUri": "http://localhost:4318/",
+    "Service": "my-service",
+    "Version": "1.0.0",
+    "Protocol": "HttpProtobuf",
+    "Debug": false
+  }
 }
 ```
+
+Required keys:
+
+- `CollectorUri`
+- `Service`
+
+Notes:
+
+- If `OTEL_EXPORTER_OTLP_ENDPOINT` is set, OpenTelemetry standard environment configuration is used.
+- `Protocol` defaults to `Grpc` if omitted.

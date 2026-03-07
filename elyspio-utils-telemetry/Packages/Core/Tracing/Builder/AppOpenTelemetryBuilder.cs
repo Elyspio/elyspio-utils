@@ -1,21 +1,28 @@
-﻿using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Diagnostics;
+using System.Net.Security;
+using Coexya.Utils.Telemetry.Technical.Data;
 using Elyspio.Utils.Telemetry.Technical.Constants;
+using Elyspio.Utils.Telemetry.Technical.Extensions;
 using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Technical.Options;
 using Elyspio.Utils.Telemetry.Technical.Options.Capture;
 using Elyspio.Utils.Telemetry.Tracing.Elements.Base;
 using Elyspio.Utils.Telemetry.Tracing.Markers;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Instrumentation.Http;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Log = Serilog.Log;
 
-namespace Elyspio.Utils.Telemetry.Tracing.Builder;
+namespace Coexya.Utils.Telemetry.Tracing.Builder;
 
 /// <summary>
 ///     Builder permettant de configurer OpenTelemetry
@@ -28,14 +35,37 @@ namespace Elyspio.Utils.Telemetry.Tracing.Builder;
 ///     <see cref="ITracingRepository" />,
 ///     vont être recherchées
 /// </typeparam>
-public sealed class AppOpenTelemetryBuilder<TAssembly>
+public sealed class AppOpenTelemetryBuilder<TAssembly> : AppOpenTelemetryBuilder
+{
+	/// <summary>
+	///    Constructeur qui ajoute automatiquement l'assembly de TAssembly
+	/// </summary>
+	/// <param name="options"></param>
+	/// <param name="configuration"></param>
+	public AppOpenTelemetryBuilder(AppOpenTelemetryBuilderOptions options, IConfiguration configuration) : base(options, configuration)
+	{
+		AddAssembly<TAssembly>();
+	}
+}
+
+/// <summary>
+///     Builder permettant de configurer OpenTelemetry
+/// </summary>
+/// <remarks>
+///		Attention, il faut appeler <see cref="AddAssembly{T}"/> pour ajouter les classes à tracer
+/// </remarks>
+public class AppOpenTelemetryBuilder
 {
 	private readonly AppOpenTelemetryBuilderOptions _options;
+	private readonly IConfiguration _configuration;
 
-	/// <param name="options"></param>
-	public AppOpenTelemetryBuilder(AppOpenTelemetryBuilderOptions options)
+	/// <summary>
+	/// Constructeur
+	/// </summary>
+	public AppOpenTelemetryBuilder(AppOpenTelemetryBuilderOptions options, IConfiguration configuration)
 	{
 		_options = options;
+		_configuration = configuration;
 		TracingContext.OpenTelemetryOptions = _options;
 	}
 
@@ -53,7 +83,7 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 	/// <summary>
 	///     Configure le tracing
 	/// </summary>
-	public Action<TracerProviderBuilder>? Tracing { get; set; }
+	public Action<TracerProviderBuilder, AppOpenTelemetryBuilder>? Tracing { get; set; }
 
 	/// <summary>
 	///     Configure les métriques
@@ -78,6 +108,35 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 	public string[] Metters { get; set; } = [];
 
 
+	private readonly HashSet<string> _sources = [];
+	private readonly List<Sampler> _samplers = [];
+
+
+	private readonly List<BaseProcessor<Activity>> _processors = [];
+
+
+	/// <summary>
+	/// Permet d'ajouter la télémétrie à une assembly (gestion des sous projets nuget)
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	public AppOpenTelemetryBuilder AddAssembly<T>()
+	{
+		var cls = AssemblyHelper.GetClassWithInterface<T, ITracingController>()
+			.Concat(AssemblyHelper.GetClassWithInterface<T, ITracingAttribute>())
+			.Concat(AssemblyHelper.GetClassWithInterface<T, ITracingMiddleware>())
+			.Concat(AssemblyHelper.GetClassWithInterface<T, ITracingService>())
+			.Concat(AssemblyHelper.GetClassWithInterface<T, ITracingAdapter>())
+			.Concat(AssemblyHelper.GetClassWithInterface<T, ITracingRepository>());
+
+		foreach (var source in cls)
+		{
+			_sources.Add(source);
+		}
+
+		return this;
+	}
+
+
 	/// <summary>
 	///     Active le tracing dans les services de l'application
 	/// </summary>
@@ -85,68 +144,39 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 	/// <returns></returns>
 	public IOpenTelemetryBuilder Build(IServiceCollection services)
 	{
-		if (_options.Debug == true) services.AddOpenTelemetryEventLogging();
-
-		var resourceBuilder = ResourceBuilder.CreateEmpty().AddService(_options.Service, serviceVersion: _options.Version);
-
-		var sources = new List<string>();
-
-		// Rest
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingController>());
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingAttribute>());
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingMiddleware>());
-
-		// Common
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingService>());
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingAdapter>());
-		sources.AddRange(AssemblyHelper.GetClassWithInterface<TAssembly, ITracingRepository>());
+		if (_options.Debug == true)
+		{
+			Log.Logger.Information("Le débug est activé pour la télémétrie");
+			services.AddOpenTelemetryEventLogging();
+		}
 
 
 		services.AddSingleton(_options.ShouldCapture);
 
-		return services.AddOpenTelemetry()
+		var (resourceBuilder, serviceName, instanceId) = GetResourceBuilder();
+
+		Log.Logger.Information("La télémétrie est configurée {Service}@{InstanceId}", serviceName, instanceId);
+
+		var builder = services.AddOpenTelemetry()
 			.WithTracing(tracing =>
 			{
 				tracing.SetResourceBuilder(resourceBuilder);
 
-				tracing.AddSource(sources.ToArray());
+				tracing.AddSource(_sources.ToArray());
 
 				tracing.AddOtlpExporter(o => ConfigureOtlpExporter(o, BuilderType.Tracing));
 
 				tracing.SetErrorStatusOnException();
 
-				tracing.AddHttpClientInstrumentation(o =>
+
+				foreach (var processor in _processors)
 				{
-					o.RecordException = true;
-					o.EnrichWithException = (activity, exception) => { activity.SetTag("exception", exception); };
+					tracing.AddProcessor(processor);
+				}
 
-					o.EnrichWithHttpRequestMessage = (activity, message) =>
-					{
-						if (!_options.CaptureCache.Http[CaptureHttp.RequestBody]) return;
-						activity.SetTag("http.request.content", message.Content?.ReadAsStringAsync().Result);
-					};
+				InstrumentDotnetCore(tracing);
 
-
-					o.EnrichWithHttpResponseMessage = (activity, message) =>
-					{
-						if (!_options.CaptureCache.Http[CaptureHttp.ResponseBody]) return;
-						activity.SetTag("http.response.content", message.Content?.ReadAsStringAsync().Result);
-					};
-
-					HttpClientInstrumentation?.Invoke(o);
-				});
-
-				tracing.AddAspNetCoreInstrumentation(o =>
-				{
-					o.RecordException = true;
-					o.Filter = ctx => IgnorePaths.All(p => !ctx.Request.Path.StartsWithSegments(p));
-					o.EnrichWithHttpResponse = HttpHelper.EnrichWithHttpResponse;
-					o.EnrichWithException = (activity, exception) => { activity.SetTag("exception", exception); };
-
-					AspNetCoreInstrumentation?.Invoke(o);
-				});
-
-				Tracing?.Invoke(tracing);
+				Tracing?.Invoke(tracing, this);
 			})
 			.WithMetrics(metric =>
 			{
@@ -159,7 +189,7 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 					.AddAspNetCoreInstrumentation();
 
 
-				metric.AddMeter(MetterConstants.DefaultMetters.Concat(sources).Concat(Metters).ToArray());
+				metric.AddMeter(MetterConstants.DefaultMetters.Concat(_sources).Concat(Metters).ToArray());
 
 
 				metric.AddView("request-duration",
@@ -169,54 +199,117 @@ public sealed class AppOpenTelemetryBuilder<TAssembly>
 					}
 				);
 
+
 				Meter?.Invoke(metric);
 			});
+
+		if (TelemetryExtension.UseStandardConfiguration)
+		{
+			builder.WithLogging(b => b.AddOtlpExporter(o => ConfigureOtlpExporter(o, BuilderType.Logging)));
+		}
+
+		return builder;
 	}
 
+	/// <summary>
+	///    Active les instrumentations par défaut pour les applications .NET Core (ASP.NET Core et HttpClient)
+	/// </summary>
+	/// <param name="tracing"></param>
+	private void InstrumentDotnetCore(TracerProviderBuilder tracing)
+	{
+		tracing.AddHttpClientInstrumentation(o =>
+		{
+			o.RecordException = true;
+			o.EnrichWithException = (activity, exception) => { activity.SetTag("exception", exception); };
+
+			HttpClientInstrumentation?.Invoke(o);
+		});
+
+		tracing.AddAspNetCoreInstrumentation(o =>
+		{
+			o.RecordException = true;
+			o.Filter = ctx => { return IgnorePaths.All(p => !ctx.Request.Path.StartsWithSegments(p)); };
+			o.EnrichWithHttpResponse = HttpHelper.EnrichWithHttpResponse;
+			o.EnrichWithException = (activity, exception) => { activity.SetTag("exception", exception); };
+
+			AspNetCoreInstrumentation?.Invoke(o);
+		});
+	}
+
+
+
+	/// <summary>
+	///    Ajoute un sampler à la liste des samplers à utiliser
+	/// </summary>
+	/// <param name="sampler"></param>
+	[PublicAPI]
+	public void AddSampler(Sampler sampler)
+	{
+		_samplers.Add(sampler);
+	}
+
+	/// <summary>
+	///   Ajoute un sampler à la liste des samplers à utiliser
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	[PublicAPI]
+	public void AddSampler<T>() where T : Sampler, new()
+	{
+		_samplers.Add(new T());
+	}
+	
+	/// <summary>
+	///    Ajoute un processor à la liste des samplers à utiliser
+	/// </summary>
+	/// <param name="processor"></param>
+	[PublicAPI]
+	public void AddProcessor<T>(T processor) where T : BaseProcessor<Activity>
+	{
+		_processors.Add(processor);
+	}
+	
 	private void ConfigureOtlpExporter(OtlpExporterOptions o, BuilderType type)
 	{
+		if (TelemetryExtension.UseStandardConfiguration) return;
+
 		o.Protocol = _options.Protocol;
 
 		var endpointUrl = _options.CollectorUri.ToString();
-		if (o.Protocol == OtlpExportProtocol.HttpProtobuf) endpointUrl += $"v1/{(type == BuilderType.Meter ? "metrics" : "traces")}";
+
+		if (o.Protocol == OtlpExportProtocol.HttpProtobuf)
+		{
+			endpointUrl += $"v1/{(type == BuilderType.Meter ? "metrics" : "traces")}";
+		}
+
+		// Lors des TU, on utilise le ExportProcessorType.Simple pour éviter le batching qui n'a pas forcément le temps de s'exécuter avant la fin du test
+		if (_options.RunningInTestEnvironment == true)
+		{
+			o.ExportProcessorType = ExportProcessorType.Simple;
+		}
+
 		o.Endpoint = new Uri(endpointUrl);
 
-		if (_options.Authentication is not null)
-			o.HttpClientFactory = () =>
-			{
-				var certificate = X509Certificate2.CreateFromPemFile(_options.Authentication.CertificatePemPath, _options.Authentication.CertificateKeyPath);
-
-				// Windows ne gère pas les certificats PEM donc on les convertit en PFX
-				if (Environment.OSVersion.Platform == PlatformID.Win32NT) certificate = X509CertificateLoader.LoadCertificate(certificate.Export(X509ContentType.Pfx));
-
-				var handler = new HttpClientHandler
-				{
-					ClientCertificates =
-					{
-						certificate
-					},
-					ServerCertificateCustomValidationCallback = ValidateCertificate
-				};
-				var client = new HttpClient(handler);
-				return client;
-			};
 	}
 
-	private bool ValidateCertificate(HttpRequestMessage message, X509Certificate2? cert, X509Chain? chain, SslPolicyErrors arg4)
+	private (ResourceBuilder builder, string serviceName, string? serviceInstanceId) GetResourceBuilder()
 	{
-		if (cert == null) return false;
-		if (chain == null) return false;
+		var name = _configuration.GetValue<string>("OTEL_SERVICE_NAME ") ?? _options.Service;
 
-		chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-		chain.ChainPolicy.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(_options.Authentication!.CaPemPath));
+		var version = _configuration.GetValue<string>("OTEL_SERVICE_VERSION") ?? _options.Version;
 
-		return chain.Build(cert);
+		var serviceInstanceId = GetServiceInstanceId();
+
+		var builder = ResourceBuilder.CreateDefault().AddService(name, serviceVersion: version, serviceInstanceId: string.IsNullOrWhiteSpace(serviceInstanceId) ? null : serviceInstanceId);
+
+		return (builder, name, serviceInstanceId);
 	}
 
-	private enum BuilderType
-	{
-		Tracing,
-		Meter,
-		Logging
-	}
+
+
+
+	/// <summary>
+	/// Récupère le hostname de la machine à partir de la variable "OTEL_SERVICE_INSTANCE_ID" ou "ALIASSARA" pour gérer le multi branche en SARA
+	/// </summary>
+	/// <returns></returns>
+	private string? GetServiceInstanceId() => Environment.GetEnvironmentVariable("OTEL_SERVICE_INSTANCE_ID");
 }

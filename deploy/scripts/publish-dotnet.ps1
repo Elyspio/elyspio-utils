@@ -16,11 +16,16 @@ Write-Output "Pushing packages to GitHub NuGet repository for solution in $SOLUT
 Set-Location -Path $SOLUTION_DIR
 
 # Pack the .NET solution
+& "dotnet.exe" clean
+
+Remove-Item -Recurse -Force -Path "$SOLUTION_DIR\*\*\bin"
+Remove-Item -Recurse -Force -Path "$SOLUTION_DIR\*\*\obj"
+
 & "dotnet.exe" pack
 
 # Find and push all .nupkg files to nuget NuGet repository
 Get-ChildItem -Recurse -Filter "*.nupkg" | ForEach-Object {
-    & "dotnet.exe" nuget push $_.FullName --api-key $PAT   --source https://api.nuget.org/v3/index.json
+    & "dotnet.exe" nuget push $_.FullName --api-key $PAT   --source https://api.nuget.org/v3/index.json --skip-duplicate
 }
 
 # Change back to the original working directory

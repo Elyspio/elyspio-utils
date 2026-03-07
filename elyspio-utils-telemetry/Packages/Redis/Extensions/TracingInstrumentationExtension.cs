@@ -19,7 +19,7 @@ public static class TracingInstrumentationExtension
 		builder.AddRedisInstrumentation(o =>
 		{
 			o.SetVerboseDatabaseStatements = true;
-			o.Enrich = (activity, command) => { activity.DisplayName = $"Redis ({command.Command})"; };
+			o.Enrich = (activity, command) => { activity.DisplayName = $"Redis ({command.ProfiledCommand.Command})"; };
 			action?.Invoke(o);
 		});
 		return builder;
