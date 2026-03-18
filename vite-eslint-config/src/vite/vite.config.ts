@@ -1,9 +1,10 @@
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import { type PluginOption, UserConfig } from "vite";
 import { convertPathToAlias } from "./internal.vite.js";
 import mkcert from "vite-plugin-mkcert";
 import tsconfig from "../tsconfig.json" with { type: "json" };
+import babel from "@rolldown/plugin-babel";
 
 type FnPlugin = () => PluginOption;
 
@@ -12,14 +13,18 @@ type GetConfigParams = {
 	port?: number;
 };
 
-export const getDefaultConfig = ({ basePath = __dirname, port = 3000 }: GetConfigParams): UserConfig => {
+export const getDefaultConfig = ({ basePath = __dirname, port }: GetConfigParams): UserConfig => {
 	const plugins: PluginOption[] = [
 		svgr(),
-		react({
-			babel: {
-				plugins: [["babel-plugin-react-compiler"]],
-			},
-		}),
+		react(),
+		babel({
+			presets: [reactCompilerPreset()],
+			plugins: [
+				"babel-plugin-transform-typescript-metadata",
+				["@babel/plugin-proposal-decorators", { legacy: true }],
+				["@babel/plugin-proposal-class-properties", { loose: true }],
+			],
+		} as any),
 		(mkcert as unknown as FnPlugin)(),
 	];
 

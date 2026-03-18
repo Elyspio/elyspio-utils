@@ -14,8 +14,8 @@
 			"dom.iterable",
 			"esnext"
 		],
-		"module": "ES2022",
-		"moduleResolution": "node",
+		"module": "esnext",
+		"moduleResolution": "bundler",
 		"noEmit": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
@@ -54,7 +54,7 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"target": "ES2022"
+		"target": "es2024"
 	},
 	"include": [
 		"src",

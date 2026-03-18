@@ -2,7 +2,7 @@
 import semver, { inc } from "semver";
 import * as path from "path";
 import * as fs from "fs/promises";
-import {execSync} from "node:child_process";
+import { execSync } from "node:child_process";
 
 const packageName = "@elyspio/vite-eslint-config"
 
@@ -47,4 +47,4 @@ async function main(version?: string) {
 
 //
 // // eslint-disable-next-line no-void
-void main("3.1.28");
+void main("4.0.4");
