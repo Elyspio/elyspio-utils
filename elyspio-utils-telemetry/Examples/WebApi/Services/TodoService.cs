@@ -9,7 +9,7 @@ using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Tracing.Elements;
 using MassTransit;
 
-namespace Coexya.Utils.Telemetry.Examples.WebApi.Services;
+namespace Elyspio.Utils.Telemetry.Examples.WebApi.Services;
 
 public class TodoService(ITodoRepository todoRepository, IUserService userService, ILogger<TodoService> logger, IBusControl bus) : TracingService(logger), ITodoService
 {

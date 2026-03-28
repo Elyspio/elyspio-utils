@@ -1,4 +1,4 @@
-namespace Coexya.Utils.Telemetry.Technical.Data;
+namespace Elyspio.Utils.Telemetry.Technical.Data;
 
 /// <summary>
 /// Type de builder télémetrie

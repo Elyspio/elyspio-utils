@@ -26,7 +26,7 @@ dotnet add package Elyspio.Utils.Telemetry.MassTransit
 ## Quick start
 
 ```csharp
-using Coexya.Utils.Telemetry.Tracing.Builder;
+using Elyspio.Utils.Telemetry.Tracing.Builder;
 using Elyspio.Utils.Telemetry.MassTransit.Extensions;
 using Elyspio.Utils.Telemetry.MongoDB.Extensions;
 using Elyspio.Utils.Telemetry.Redis.Extensions;

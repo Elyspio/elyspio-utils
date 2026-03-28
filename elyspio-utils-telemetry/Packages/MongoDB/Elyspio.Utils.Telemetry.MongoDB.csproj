@@ -8,14 +8,14 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PackageId>Elyspio.Utils.Telemetry.MongoDB</PackageId>
-		<Version>1.1.2</Version>
+		<Version>1.3.0</Version>
 		<PackageDescription>Bootstrap OpenTelemetry instrumentation/exporter</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MongoDB.Driver" Version="3.6.0" />
-		<PackageReference Include="OpenTelemetry.Api" Version="1.15.0" />
+		<PackageReference Include="MongoDB.Driver" Version="3.7.1" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.15.1" />
 	</ItemGroup>
 
 	<ItemGroup>

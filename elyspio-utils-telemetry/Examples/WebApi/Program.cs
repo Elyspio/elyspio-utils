@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using Coexya.Utils.Telemetry.Examples.WebApi.Services;
-using Coexya.Utils.Telemetry.Tracing.Builder;
+using Elyspio.Utils.Telemetry.Examples.WebApi.Services;
+using Elyspio.Utils.Telemetry.Tracing.Builder;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
 using Elyspio.Utils.Telemetry.Examples.WebApi.MassTransit.Consumers;
@@ -8,7 +8,6 @@ using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Mongo;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Sql;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Rest.Filters;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Rest.Middlewares;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Services;
 using Elyspio.Utils.Telemetry.MassTransit.Extensions;
 using Elyspio.Utils.Telemetry.MongoDB.Extensions;
 using Elyspio.Utils.Telemetry.Redis.Extensions;

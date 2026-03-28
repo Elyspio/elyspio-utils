@@ -1,17 +1,14 @@
 ﻿using System.Diagnostics;
-using System.Net.Security;
-using Coexya.Utils.Telemetry.Technical.Data;
+using Elyspio.Utils.Telemetry.Technical.Data;
 using Elyspio.Utils.Telemetry.Technical.Constants;
 using Elyspio.Utils.Telemetry.Technical.Extensions;
 using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Technical.Options;
-using Elyspio.Utils.Telemetry.Technical.Options.Capture;
 using Elyspio.Utils.Telemetry.Tracing.Elements.Base;
 using Elyspio.Utils.Telemetry.Tracing.Markers;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -22,7 +19,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Log = Serilog.Log;
 
-namespace Coexya.Utils.Telemetry.Tracing.Builder;
+namespace Elyspio.Utils.Telemetry.Tracing.Builder;
 
 /// <summary>
 ///     Builder permettant de configurer OpenTelemetry
