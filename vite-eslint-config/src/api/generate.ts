@@ -1,14 +1,14 @@
-import { spawnSync } from "child_process";
+import { spawnSync } from "node:child_process";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
 export async function generateApi(url: string, outputFolder: string, tag: string) {
 	if (fs.existsSync(outputFolder)) {
-		await fs.promises.rm(outputFolder, { recursive: true });
+		await fs.promises.rm(outputFolder, { recursive: true, force: true });
 	}
 	await fs.promises.mkdir(outputFolder, { recursive: true });
 
-	spawnSync(
+	const result = spawnSync(
 		"npx",
 		[
 			"@openapitools/openapi-generator-cli",
@@ -30,8 +30,11 @@ export async function generateApi(url: string, outputFolder: string, tag: string
 				...process.env,
 				JAVA_OPTS: "-Dio.swagger.parser.util.RemoteUrl.trustAll=true -Dio.swagger.v3.parser.util.RemoteUrl.trustAll=true",
 			},
-		}
+		},
 	);
+	if (result.status !== 0) {
+		throw new Error(`OpenAPI generator exited with code ${result.status ?? "unknown"}.`);
+	}
 	await cleanGeneratedFolder(outputFolder);
 	await addTsIgnore(outputFolder);
 }
@@ -44,7 +47,7 @@ async function cleanGeneratedFolder(folder: string) {
 async function addTsIgnore(folder: string) {
 	const files = await fs.promises.readdir(folder);
 
-	for (const file of files.filter((f) => f.endsWith(".ts"))) {
+	for (const file of files.filter((fileName: string) => fileName.endsWith(".ts"))) {
 		const filepath = path.join(folder, file);
 		let content = (await fs.promises.readFile(filepath)).toString();
 		content = "// @ts-nocheck\n" + content;

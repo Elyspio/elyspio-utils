@@ -1,20 +1,15 @@
 {
 	"compilerOptions": {
-		"lib": [
-			"ES2022",
-			"esNext"
-		],
+		"lib": ["ES2024"],
+		"types": ["node"],
 		"esModuleInterop": true,
 		"skipLibCheck": true,
+		"strict": true,
 		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "nodenext",
 		"resolveJsonModule": true,
-		"outDir": "out-js",
-		"declaration": true
+		"noEmit": true
 	},
-	"include": [
-		"./src",
-		"./scripts"
-	]
+	"include": ["./src", "./scripts", "./vite.config.ts"]
 }

@@ -1,17 +1,17 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import semver, { inc } from "semver";
-import * as path from "path";
-import * as fs from "fs/promises";
+import * as path from "node:path";
+import * as fs from "node:fs/promises";
 import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const packageName = "@elyspio/vite-eslint-config"
+const packageName = "@elyspio/vite-eslint-config";
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Get latest version of the package from DevOps artifacts
  */
 async function getPackageVersion() {
-
-	const raw = execSync(`npm show ${packageName} version`).toString()
+	const raw = execSync(`npm show ${packageName} version`).toString();
 
 	return semver.parse(raw);
 }
@@ -21,7 +21,7 @@ async function getPackageVersion() {
  * @param version
  */
 async function writeVersionToPackageJson(version: string) {
-	const packageJsonPath = path.resolve(__dirname, "..", "src", "package.json");
+	const packageJsonPath = path.resolve(dirname, "..", "package.json");
 
 	let raw = (await fs.readFile(packageJsonPath)).toString();
 	const json = JSON.parse(raw) as { version: string };
@@ -32,10 +32,13 @@ async function writeVersionToPackageJson(version: string) {
 	await fs.writeFile(packageJsonPath, raw);
 }
 
-
 async function main(version?: string) {
 	if (!version) {
 		const serverVersion = await getPackageVersion();
+		if (!serverVersion) {
+			throw new Error(`Unable to parse the published version for ${packageName}.`);
+		}
+
 		console.log("Remote version", serverVersion.raw);
 
 		version = inc(serverVersion, "patch")!;
@@ -45,6 +48,5 @@ async function main(version?: string) {
 	await writeVersionToPackageJson(version);
 }
 
-//
-// // eslint-disable-next-line no-void
-void main("4.0.4");
+void main(process.argv[2]);
+// void main("5.0.0");

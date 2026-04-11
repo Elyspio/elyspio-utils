@@ -9,55 +9,29 @@
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
-		"lib": [
-			"dom",
-			"dom.iterable",
-			"esnext"
-		],
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"types": ["node"],
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"paths": {
-			"@/*": [
-				"./src/*"
-			],
-			"@apis/*": [
-				"./src/core/apis/*"
-			],
-			"@components/*": [
-				"./src/view/components/*"
-			],
-			"@hooks/*": [
-				"./src/view/hooks/*"
-			],
-			"@pages/*": [
-				"./src/view/pages/*"
-			],
-			"@modules/*": [
-				"./src/store/modules/*"
-			],
-			"@services/*": [
-				"./src/core/services/*"
-			],
-			"@validators/*": [
-				"./src/core/validators/*"
-			],
-			"@store": [
-				"./src/store/index.ts"
-			],
-			"@store/*": [
-				"./src/store/*"
-			]
+			"@/*": ["./src/*"],
+			"@apis/*": ["./src/core/apis/*"],
+			"@components/*": ["./src/view/components/*"],
+			"@hooks/*": ["./src/view/hooks/*"],
+			"@pages/*": ["./src/view/pages/*"],
+			"@modules/*": ["./src/store/modules/*"],
+			"@services/*": ["./src/core/services/*"],
+			"@validators/*": ["./src/core/validators/*"],
+			"@store": ["./src/store/index.ts"],
+			"@store/*": ["./src/store/*"]
 		},
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "es2024"
 	},
-	"include": [
-		"src",
-		"api"
-	]
+	"include": ["src", "api"]
 }
