@@ -1,52 +1,36 @@
-﻿using System.Collections.Frozen;
+using System.Collections.Frozen;
 using Elyspio.Utils.Telemetry.Technical.Options.Capture;
 
 namespace Elyspio.Utils.Telemetry.Technical.Options.Cache;
 
-/// <summary>
-///     Cache des options de capture pour la télémétrie
-/// </summary>
+/// <summary>Fast, dynamically refreshable capture settings.</summary>
 public class TelemetryCaptureCache
 {
-	/// <inheritdoc cref="CaptureLevel" />
+	/// <summary>Gets the enabled state for each capture level.</summary>
 	public FrozenDictionary<CaptureLevel, bool> Levels { get; private set; } = new Dictionary<CaptureLevel, bool>
 	{
-		{ CaptureLevel.Enter, true },
-		{ CaptureLevel.Exit, true },
-		{ CaptureLevel.Warning, true },
-		{ CaptureLevel.Information, true },
-		{ CaptureLevel.Error, true },
-		{ CaptureLevel.Debug, false }
+		{ CaptureLevel.Enter, true }, { CaptureLevel.Exit, true }, { CaptureLevel.Warning, true },
+		{ CaptureLevel.Information, true }, { CaptureLevel.Error, true }, { CaptureLevel.Debug, false }, { CaptureLevel.Trace, false }
 	}.ToFrozenDictionary();
 
-	/// <inheritdoc cref="CaptureHttp" />
-	public FrozenDictionary<CaptureHttp, bool> Http { get; private set; } = new Dictionary<CaptureHttp, bool>
-	{
-		{ CaptureHttp.RequestBody, false },
-		{ CaptureHttp.ResponseBody, false }
-	}.ToFrozenDictionary();
-
-	/// <inheritdoc cref="CaptureComponent" />
+	/// <summary>Gets the enabled state for each capture component.</summary>
 	public FrozenDictionary<CaptureComponent, bool> Components { get; private set; } = new Dictionary<CaptureComponent, bool>
 	{
-		{ CaptureComponent.Controller, true },
-		{ CaptureComponent.Middleware, true },
-		{ CaptureComponent.Consumer, true },
-		{ CaptureComponent.Service, false },
-		{ CaptureComponent.Adapter, false },
-		{ CaptureComponent.Repository, false }
+		{ CaptureComponent.Controller, true }, { CaptureComponent.Middleware, true }, { CaptureComponent.Consumer, true },
+		{ CaptureComponent.Service, false }, { CaptureComponent.Adapter, false }, { CaptureComponent.Repository, false }
 	}.ToFrozenDictionary();
 
-	/// <summary>
-	///     Met à jour les options de capture
-	/// </summary>
-	/// <param name="components"></param>
-	/// <param name="levels"></param>
-	/// <param name="http"></param>
-	public void Update(Dictionary<CaptureComponent, bool> components, Dictionary<CaptureLevel, bool> levels, Dictionary<CaptureHttp, bool> http)
+	/// <summary>Gets whether telemetry capture is active.</summary>
+	public bool Activated { get; private set; }
+
+	/// <summary>Replaces the cached capture settings.</summary>
+	/// <param name="activated">Whether telemetry capture is active.</param>
+	/// <param name="components">The component capture settings.</param>
+	/// <param name="levels">The capture-level settings.</param>
+	public void Update(bool activated, FrozenDictionary<CaptureComponent, bool> components, FrozenDictionary<CaptureLevel, bool> levels)
 	{
-		Levels = levels.ToFrozenDictionary();
-		Http = http.ToFrozenDictionary();
-		Components = components.ToFrozenDictionary();
+		Activated = activated;
+		Components = components;
+		Levels = levels;
 	}
 }

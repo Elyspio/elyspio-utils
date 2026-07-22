@@ -2,16 +2,14 @@
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Assemblers;
-using Elyspio.Utils.Telemetry.Examples.WebApi.MassTransit.Messages;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Base;
 using Elyspio.Utils.Telemetry.Examples.WebApi.Models.Transports;
 using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Tracing.Elements;
-using MassTransit;
 
 namespace Elyspio.Utils.Telemetry.Examples.WebApi.Services;
 
-public class TodoService(ITodoRepository todoRepository, IUserService userService, ILogger<TodoService> logger, IBusControl bus) : TracingService(logger), ITodoService
+public class TodoService(ITodoRepository todoRepository, IUserService userService, ILogger<TodoService> logger) : TracingService(logger), ITodoService
 {
 	private readonly TodoAssembler _todoAssembler = new();
 
@@ -67,6 +65,6 @@ public class TodoService(ITodoRepository todoRepository, IUserService userServic
 
 		if (username != todo.User) throw new Exception("This is not your todo");
 
-		await bus.Publish(new ToggleTodoMessage(idTodo));
+		await todoRepository.Toggle(idTodo);
 	}
 }

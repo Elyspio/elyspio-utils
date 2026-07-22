@@ -158,7 +158,11 @@ public sealed class MongoDbActivityEventSubscriber : IEventSubscriber
 				break;
 		}
 
-		if (activity.IsAllDataRequested && _options.CaptureCommandText) activity.AddTag("db.statement", @event.Command.ToString());
+		if (activity.IsAllDataRequested && _options.CaptureCommandText)
+		{
+			var command = collectionName?.Contains(".chunks", StringComparison.OrdinalIgnoreCase) == true ? "GridFS" : @event.Command.ToString();
+			activity.AddTag("db.statement", command);
+		}
 	}
 
 	#endregion Add Tags
