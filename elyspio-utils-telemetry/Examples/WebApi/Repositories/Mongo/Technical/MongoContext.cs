@@ -27,7 +27,7 @@ public sealed class MongoContext
 	/// <param name="configuration"></param>
 	public MongoContext(IConfiguration configuration)
 	{
-		var connectionString = configuration["Mongo"]!;
+		var connectionString = configuration.GetConnectionString("mongo") ?? configuration["Mongo"]!;
 
 		if (!Databases.TryGetValue(connectionString, out var value))
 		{

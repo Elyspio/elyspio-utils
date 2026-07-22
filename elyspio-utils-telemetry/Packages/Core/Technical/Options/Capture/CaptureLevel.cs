@@ -35,4 +35,7 @@ public enum CaptureLevel
 	///     Si les logs d'erreur sont capturés (attention, peut être sensible)
 	/// </summary>
 	Error = 32,
+
+	/// <summary>Detailed instrumentation payloads such as HTTP headers.</summary>
+	Trace = 64,
 }

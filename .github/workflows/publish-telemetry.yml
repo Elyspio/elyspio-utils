@@ -1,0 +1,62 @@
+name: Publish Elyspio telemetry packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "elyspio-utils-telemetry/**"
+      - ".github/workflows/publish-telemetry.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish packages after validation"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    name: Build and publish new NuGet versions
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+
+    defaults:
+      run:
+        working-directory: elyspio-utils-telemetry
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore, test, and build
+        run: |
+          dotnet restore Elyspio.Utils.Telemetry.slnx
+          dotnet test Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
+          dotnet build Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
+
+      - name: Pack publishable packages
+        run: |
+          dotnet pack Packages/Core/Elyspio.Utils.Telemetry.csproj --no-build --configuration Release --output artifacts
+          dotnet pack Packages/Sql/Elyspio.Utils.Telemetry.Sql.csproj --no-build --configuration Release --output artifacts
+          dotnet pack Packages/Redis/Elyspio.Utils.Telemetry.Redis.csproj --no-build --configuration Release --output artifacts
+          dotnet pack Packages/MongoDB/Elyspio.Utils.Telemetry.MongoDB.csproj --no-build --configuration Release --output artifacts
+
+      - name: Authenticate with NuGet trusted publishing
+        uses: NuGet/login@v1
+        id: nuget_login
+        with:
+          user: Elyspio
+
+      - name: Publish versions not already on NuGet.org
+        if: github.event_name == 'push' || inputs.publish == true
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate

@@ -1,14 +1,18 @@
 ﻿using System.Diagnostics;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Elyspio.Utils.Telemetry.Technical.Data;
 using Elyspio.Utils.Telemetry.Technical.Constants;
 using Elyspio.Utils.Telemetry.Technical.Extensions;
 using Elyspio.Utils.Telemetry.Technical.Helpers;
 using Elyspio.Utils.Telemetry.Technical.Options;
 using Elyspio.Utils.Telemetry.Tracing.Elements.Base;
+using Elyspio.Utils.Telemetry.Tracing.Samplers;
 using Elyspio.Utils.Telemetry.Tracing.Markers;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -164,6 +168,7 @@ public class AppOpenTelemetryBuilder
 				tracing.AddOtlpExporter(o => ConfigureOtlpExporter(o, BuilderType.Tracing));
 
 				tracing.SetErrorStatusOnException();
+				tracing.SetSampler(new MultiSampler(_samplers));
 
 
 				foreach (var processor in _processors)
@@ -218,6 +223,23 @@ public class AppOpenTelemetryBuilder
 		{
 			o.RecordException = true;
 			o.EnrichWithException = (activity, exception) => { activity.SetTag("exception", exception); };
+			o.EnrichWithHttpRequestMessage = (activity, message) =>
+			{
+				if (!_options.Cache.Activated || !_options.Cache.Levels.TryGetValue(Technical.Options.Capture.CaptureLevel.Trace, out var enabled) || !enabled) return;
+				try
+				{
+					activity.SetTag("http.request.headers", JsonConvert.SerializeObject(message.Headers));
+					if (message.Content is null) return;
+					if (message.Content.Headers.ContentLength > 32 * 1024) { activity.SetTag("http.request.content", "[Payload too large to record]"); return; }
+					activity.SetTag("http.request.content", message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+				}
+				catch (Exception) { }
+			};
+			o.EnrichWithHttpResponseMessage = (activity, message) =>
+			{
+				if (_options.Cache.Activated && _options.Cache.Levels.TryGetValue(Technical.Options.Capture.CaptureLevel.Trace, out var enabled) && enabled)
+					activity.SetTag("http.response.headers", JsonConvert.SerializeObject(message.Headers));
+			};
 
 			HttpClientInstrumentation?.Invoke(o);
 		});
@@ -286,6 +308,30 @@ public class AppOpenTelemetryBuilder
 
 		o.Endpoint = new Uri(endpointUrl);
 
+		if (_options.Authentication is not null)
+			o.HttpClientFactory = () => CreateMtlsClient(_options.Authentication);
+
+	}
+
+	private static HttpClient CreateMtlsClient(Technical.Options.Auth.CertificateAuthenticationOptions authentication)
+	{
+		var certificate = X509Certificate2.CreateFromPemFile(authentication.CertificatePemPath, authentication.CertificateKeyPath);
+		if (OperatingSystem.IsWindows())
+		{
+			const string password = "elyspio-telemetry";
+			certificate = X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx, password), password);
+		}
+		var handler = new HttpClientHandler { ServerCertificateCustomValidationCallback = (_, cert, chain, _) => ValidateCertificate(cert, chain, authentication.CaPemPath) };
+		handler.ClientCertificates.Add(certificate);
+		return new HttpClient(handler);
+	}
+
+	private static bool ValidateCertificate(X509Certificate2? certificate, X509Chain? chain, string caPath)
+	{
+		if (certificate is null || chain is null) return false;
+		chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+		chain.ChainPolicy.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(caPath));
+		return chain.Build(certificate);
 	}
 
 	private (ResourceBuilder builder, string serviceName, string? serviceInstanceId) GetResourceBuilder()

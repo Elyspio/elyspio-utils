@@ -1,59 +1,31 @@
-﻿using Elyspio.Utils.Telemetry.Technical.Options.Cache;
+using Elyspio.Utils.Telemetry.Technical.Options.Auth;
+using Elyspio.Utils.Telemetry.Technical.Options.Cache;
 using Elyspio.Utils.Telemetry.Technical.Options.Capture;
 using OpenTelemetry.Exporter;
 
 namespace Elyspio.Utils.Telemetry.Technical.Options;
 
-/// <summary>
-///     Options for OpenTelemetryBuilder
-/// </summary>
+/// <summary>Options used to configure OpenTelemetry.</summary>
 public sealed class AppOpenTelemetryBuilderOptions
 {
-	/// <summary>
-	///     Address of the OpenTelemetry collector
-	/// </summary>
+	/// <summary>Gets the OTLP collector endpoint.</summary>
 	public required Uri CollectorUri { get; init; }
-
-	/// <summary>
-	///     Service name
-	/// </summary>
+	/// <summary>Gets the service name reported by telemetry.</summary>
 	public required string Service { get; init; }
-
-	/// <summary>
-	///     Service version
-	/// </summary>
+	/// <summary>Gets the optional service version reported by telemetry.</summary>
 	public string? Version { get; init; }
-
-	/// <summary>
-	///     Log telemetry internal errors to console
-	/// </summary>
+	/// <summary>Gets whether debug telemetry is enabled.</summary>
 	public bool? Debug { get; init; } = false;
-
-	
-	/// <summary>
-	/// 
-	/// </summary>
-	public bool? Traces { get; set; } = false;
-	
-	/// <summary>
-	///     Protocol used to communicate with the collector
-	/// </summary>
+	/// <summary>Gets whether the application is running in a test environment.</summary>
+	public bool? RunningInTestEnvironment { get; init; } = false;
+	/// <summary>Gets the OTLP transport protocol.</summary>
 	public OtlpExportProtocol Protocol { get; init; } = OtlpExportProtocol.Grpc;
-
-	/// <summary>
-	///     Determine if a component sould be traced
-	/// </summary>
+	/// <summary>Gets the configured telemetry capture settings.</summary>
 	public TelemetryCapture ShouldCapture { get; init; } = new();
-
-	/// <summary>
-	///     Cache de l'activation des logs levels et des logs des http body (hors DI)
-	/// </summary>
-	public TelemetryCaptureCache CaptureCache { get; } = new();
-
-
-	/// <summary>
-	///    Determine if the application is running in a test environment (e.g. unit tests, integration tests, etc.)
-	/// </summary>
-	public bool RunningInTestEnvironment { get; set; }
-
+	/// <summary>Gets the dynamically refreshable telemetry capture settings.</summary>
+	public TelemetryCaptureCache Cache { get; } = new();
+	/// <summary>Backward-compatible alias for <see cref="Cache"/>.</summary>
+	public TelemetryCaptureCache CaptureCache => Cache;
+	/// <summary>Gets the optional certificate authentication settings for the exporter.</summary>
+	public CertificateAuthenticationOptions? Authentication { get; init; }
 }

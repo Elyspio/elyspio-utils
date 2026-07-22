@@ -1,11 +1,9 @@
 ﻿<Solution>
 	<Folder Name="/Examples/">
+		<Project Path="Examples\AppHost\Elyspio.Utils.Telemetry.Examples.AppHost.csproj" Type="Classic C#" />
 		<Project Path="Examples\WebApi\Elyspio.Utils.Telemetry.Examples.WebApi.csproj" Type="Classic C#"/>
 	</Folder>
 	<Folder Name="/Modules/">
-		<Project Path="Packages\MassTransit\Elyspio.Utils.Telemetry.MassTransit.csproj" Type="Classic C#">
-			<Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy"/>
-		</Project>
 		<Project Path="Packages\MongoDB\Elyspio.Utils.Telemetry.MongoDB.csproj" Type="Classic C#">
 			<Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy"/>
 		</Project>
@@ -15,6 +13,9 @@
 		<Project Path="Packages\Sql\Elyspio.Utils.Telemetry.Sql.csproj" Type="Classic C#">
 			<Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy"/>
 		</Project>
+	</Folder>
+	<Folder Name="/Tests/">
+		<Project Path="Packages\Sql.Tests\Elyspio.Utils.Telemetry.Sql.Tests.csproj" Type="Classic C#" />
 	</Folder>
 	<Project Path="Packages\Core\Elyspio.Utils.Telemetry.csproj" Type="Classic C#">
 		<Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy"/>
