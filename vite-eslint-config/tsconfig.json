@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"lib": ["ES2024"],
 		"types": ["node"],
-		"esModuleInterop": true,
+		"erasableSyntaxOnly": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "ES2022",

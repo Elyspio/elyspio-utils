@@ -7,6 +7,7 @@ export default defineConfig({
 		singleQuote: false,
 		tabWidth: 4,
 		useTabs: true,
+		trailingComma: "es5",
 	},
 	lint: {
 		ignorePatterns: ["dist/**", "node_modules/**"],
@@ -16,6 +17,7 @@ export default defineConfig({
 		},
 	},
 	pack: {
+		deps: { resolveDepSubpath: true },
 		clean: false,
 		dts: true,
 		entry: {
