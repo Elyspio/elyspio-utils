@@ -15,12 +15,12 @@ Run commands from the relevant package directory:
 
 ```bash
 dotnet build Elyspio.Utils.Telemetry.slnx
-dotnet test Elyspio.Utils.Telemetry.slnx
+dotnet test --solution Elyspio.Utils.Telemetry.slnx
 dotnet run --project Examples/WebApi/Elyspio.Utils.Telemetry.Examples.WebApi.csproj
 docker compose -f Examples/Databases/docker-compose.yml up -d
 ```
 
-Use `pnpm install` in `vite-eslint-config/`, then `pnpm check` for linting/format checks and `pnpm build` to create the distributable package. Use the lockfile’s pinned pnpm version (`10.32.1`).
+Use `pnpm install` in `vite-eslint-config/`, then `pnpm check` for linting/format checks and `pnpm build` to create the distributable package. Use the lockfile’s pinned pnpm version (`12.5.1`).
 
 ## Coding Style & Naming Conventions
 
@@ -30,10 +30,10 @@ TypeScript uses tabs, ESM imports, and camelCase for functions and variables. Ru
 
 ## Testing Guidelines
 
-Tests use xUnit and live in `*.Tests` projects. Name test classes after the subject and test methods with behavior-focused names, such as `Extracts_commands_and_tables`. Add regression coverage with every behavior change. Run targeted tests with:
+Tests use xUnit v3 (Microsoft Testing Platform) with Shouldly assertions and live in `*.Tests` projects. Name test classes after the subject and test methods with behavior-focused names, such as `Extracts_commands_and_tables`. Add regression coverage with every behavior change. Run targeted tests with:
 
 ```bash
-dotnet test Packages/Sql.Tests/Elyspio.Utils.Telemetry.Sql.Tests.csproj
+dotnet test --project Packages/Sql.Tests/Elyspio.Utils.Telemetry.Sql.Tests.csproj
 ```
 
 ## Commit & Pull Request Guidelines

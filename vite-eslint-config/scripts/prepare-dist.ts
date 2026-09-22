@@ -16,6 +16,7 @@ type PackageJson = {
 	license?: string;
 	name: string;
 	peerDependencies?: Record<string, string>;
+	peerDependenciesMeta?: Record<string, { optional?: boolean }>;
 	publishConfig?: Record<string, unknown>;
 	repository?: string | { directory?: string; type?: string; url?: string };
 	sideEffects?: boolean | string[];
@@ -58,6 +59,7 @@ async function createDistPackageJson() {
 		sideEffects: packageJson.sideEffects,
 		dependencies: packageJson.dependencies,
 		peerDependencies: packageJson.peerDependencies,
+		peerDependenciesMeta: packageJson.peerDependenciesMeta,
 		repository: packageJson.repository,
 		homepage: packageJson.homepage,
 		bugs: packageJson.bugs,
@@ -75,14 +77,7 @@ async function main() {
 	await fs.mkdir(distDir, { recursive: true });
 	await createDistPackageJson();
 
-	await Promise.all([
-		copyIfPresent(".npmrc"),
-		copyIfPresent("eslint.config.mjs"),
-		copyIfPresent("LICENSE"),
-		copyIfPresent("prettier.config.js"),
-		copyIfPresent("README.md"),
-		copyIfPresent(path.join("src", "tsconfig.json"), "tsconfig.json"),
-	]);
+	await Promise.all([copyIfPresent(".npmrc"), copyIfPresent("LICENSE"), copyIfPresent("README.md"), copyIfPresent(path.join("src", "tsconfig.json"), "tsconfig.json")]);
 }
 
 void main();

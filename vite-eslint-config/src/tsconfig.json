@@ -1,15 +1,9 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
-		"allowSyntheticDefaultImports": true,
-		"downlevelIteration": true,
-		"emitDecoratorMetadata": true,
-		"esModuleInterop": true,
-		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"lib": ["ESNext", "DOM"],
 		"types": ["node"],
 		"module": "esnext",
 		"moduleResolution": "bundler",
@@ -17,21 +11,21 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"paths": {
-			"@/*": ["./src/*"],
-			"@apis/*": ["./src/core/apis/*"],
-			"@components/*": ["./src/view/components/*"],
-			"@hooks/*": ["./src/view/hooks/*"],
-			"@pages/*": ["./src/view/pages/*"],
-			"@modules/*": ["./src/store/modules/*"],
-			"@services/*": ["./src/core/services/*"],
-			"@validators/*": ["./src/core/validators/*"],
-			"@store": ["./src/store/index.ts"],
-			"@store/*": ["./src/store/*"]
+			"@/*": ["${configDir}/src/*"],
+			"@apis/*": ["${configDir}/src/core/apis/*"],
+			"@components/*": ["${configDir}/src/view/components/*"],
+			"@hooks/*": ["${configDir}/src/view/hooks/*"],
+			"@pages/*": ["${configDir}/src/view/pages/*"],
+			"@modules/*": ["${configDir}/src/store/modules/*"],
+			"@services/*": ["${configDir}/src/core/services/*"],
+			"@validators/*": ["${configDir}/src/core/validators/*"],
+			"@store": ["${configDir}/src/store/index.ts"],
+			"@store/*": ["${configDir}/src/store/*"]
 		},
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "es2024"
 	},
-	"include": ["src", "api"]
+	"include": ["${configDir}/src"]
 }

@@ -1,52 +1,48 @@
-import semver, { inc } from "semver";
-import * as path from "node:path";
-import * as fs from "node:fs/promises";
 import { execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 
 const packageName = "@elyspio/vite-eslint-config";
-const dirname = path.dirname(fileURLToPath(import.meta.url));
+const packageJsonPath = path.resolve(import.meta.dirname, "..", "package.json");
 
-/**
- * Get latest version of the package from DevOps artifacts
- */
-async function getPackageVersion() {
-	const raw = execSync(`npm show ${packageName} version`).toString();
+type Version = [major: number, minor: number, patch: number];
 
-	return semver.parse(raw);
+function parse(raw: string): Version {
+	const match = /^(\d+)\.(\d+)\.(\d+)/.exec(raw.trim());
+	if (!match) {
+		throw new Error(`Unable to parse the version "${raw}" for ${packageName}.`);
+	}
+	return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function compare(a: Version, b: Version) {
+	return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 }
 
 /**
- * Write the new version to the package.json
- * @param version
+ * Resolve the version to publish: an explicit argument wins, then a local version above the published one (manual major or minor bump),
+ * otherwise the next patch of the published version.
  */
-async function writeVersionToPackageJson(version: string) {
-	const packageJsonPath = path.resolve(dirname, "..", "package.json");
-
-	let raw = (await fs.readFile(packageJsonPath)).toString();
-	const json = JSON.parse(raw) as { version: string };
-	json.version = version;
-
-	raw = JSON.stringify(json, null, 4).replaceAll("    ", "\t");
-
-	await fs.writeFile(packageJsonPath, raw);
-}
-
-async function main(version?: string) {
-	if (!version) {
-		const serverVersion = await getPackageVersion();
-		if (!serverVersion) {
-			throw new Error(`Unable to parse the published version for ${packageName}.`);
-		}
-
-		console.log("Remote version", serverVersion.raw);
-
-		version = inc(serverVersion, "patch")!;
-		console.log("New version", version);
+function resolveVersion(local: string, explicit?: string) {
+	if (explicit) {
+		return explicit;
 	}
 
-	await writeVersionToPackageJson(version);
+	const remote = parse(execSync(`npm show ${packageName} version`).toString());
+	console.log("Remote version", remote.join("."));
+
+	if (compare(parse(local), remote) > 0) {
+		return local;
+	}
+	return [remote[0], remote[1], remote[2] + 1].join(".");
 }
 
-void main(process.argv[2]);
-// void main("5.0.0");
+async function main(explicit?: string) {
+	const json = JSON.parse(await fs.readFile(packageJsonPath, "utf8")) as { version: string };
+	json.version = resolveVersion(json.version, explicit);
+	console.log("New version", json.version);
+
+	await fs.writeFile(packageJsonPath, `${JSON.stringify(json, null, "\t")}\n`);
+}
+
+await main(process.argv[2]);
