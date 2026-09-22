@@ -1,6 +1,6 @@
 {
 	"name": "@elyspio/vite-eslint-config",
-	"version": "7.0.0",
+	"version": "8.0.0-rc.0",
 	"description": "Shared Vite+ defaults for React, TypeScript, Oxlint and Oxfmt projects.",
 	"license": "MIT",
 	"files": [
@@ -60,7 +60,7 @@
 	},
 	"peerDependencies": {
 		"@hey-api/openapi-ts": ">=0.99.0",
-		"vite-plus": "^0.3.3"
+		"vite-plus": "^1.0.0-rc.0"
 	},
 	"peerDependenciesMeta": {
 		"@hey-api/openapi-ts": {
