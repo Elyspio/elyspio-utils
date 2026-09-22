@@ -1,6 +1,6 @@
 {
 	"name": "@elyspio/vite-eslint-config",
-	"version": "6.0.0",
+	"version": "7.0.0",
 	"description": "Shared Vite+ defaults for React, TypeScript, Oxlint and Oxfmt projects.",
 	"license": "MIT",
 	"files": [
@@ -44,7 +44,7 @@
 		"publish": "pnpm run version:sync && pnpm run pack && cd dist && npm publish"
 	},
 	"dependencies": {
-		"@babel/core": "^8.0.5",
+		"@babel/core": "^8.0.6",
 		"@rolldown/plugin-babel": "^0.2.4",
 		"@vitejs/plugin-react": "^6.1.1",
 		"babel-plugin-react-compiler": "^1.0.0",
@@ -53,14 +53,14 @@
 	},
 	"devDependencies": {
 		"@hey-api/openapi-ts": "0.99.0",
-		"@types/node": "^26.5.1",
+		"@types/node": "^26.6.2",
 		"typescript": "7.0.2",
 		"vite": "catalog:",
 		"vite-plus": "catalog:"
 	},
 	"peerDependencies": {
 		"@hey-api/openapi-ts": ">=0.99.0",
-		"vite-plus": "^0.3.1"
+		"vite-plus": "^0.3.3"
 	},
 	"peerDependenciesMeta": {
 		"@hey-api/openapi-ts": {
@@ -68,7 +68,7 @@
 		}
 	},
 	"engines": {
-		"node": ">=22.18.0"
+		"node": ">=26.0.0"
 	},
-	"packageManager": "pnpm@11.25.0"
+	"packageManager": "pnpm@12.5.1"
 }
