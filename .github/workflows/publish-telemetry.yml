@@ -31,17 +31,17 @@ jobs:
         working-directory: elyspio-utils-telemetry
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.0.x"
+          global-json-file: elyspio-utils-telemetry/global.json
 
       - name: Restore, test, and build
         run: |
           dotnet restore Elyspio.Utils.Telemetry.slnx
-          dotnet test Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
+          dotnet test --solution Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
           dotnet build Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
 
       - name: Pack publishable packages

@@ -1,5 +1,6 @@
 using Elyspio.Utils.Telemetry.Sql.Helpers;
 using Microsoft.Data.SqlClient;
+using Shouldly;
 using Xunit;
 
 namespace Elyspio.Utils.Telemetry.Sql.Tests;
@@ -13,8 +14,8 @@ public class SqlHelperTests
 	[InlineData("INSERT INTO [dbo].[Users] ([Name]) VALUES (@name)", "INSERT", "dbo.Users")]
 	public void Extracts_commands_and_tables(string query, string command, params string[] tables)
 	{
-		Assert.Equal(command, SqlHelper.ExtractCommandFromQuery(query).ToUpperInvariant());
-		foreach (var table in tables) Assert.Contains(table, SqlHelper.ExtractTablesFromQuery(query), StringComparer.OrdinalIgnoreCase);
+		SqlHelper.ExtractCommandFromQuery(query).ToUpperInvariant().ShouldBe(command);
+		foreach (var table in tables) SqlHelper.ExtractTablesFromQuery(query).ShouldContain(t => string.Equals(t, table, StringComparison.OrdinalIgnoreCase));
 	}
 
 	[Fact]
@@ -24,7 +25,7 @@ public class SqlHelperTests
 		command.Parameters.AddWithValue("@id", 42);
 		command.Parameters.AddWithValue("@payload", new string('x', 1200));
 		var values = SqlHelper.ExtractParameterValues(command.Parameters);
-		Assert.Equal("42", values["id"]);
-		Assert.EndsWith("… (truncated, 1200 chars)", values["payload"]);
+		values["id"].ShouldBe("42");
+		values["payload"].ShouldEndWith("… (truncated, 1200 chars)");
 	}
 }
