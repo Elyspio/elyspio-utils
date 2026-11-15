@@ -1,91 +1,115 @@
-using System.Text.Json.Serialization;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Services;
-using Elyspio.Utils.Telemetry.Tracing.Builder;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Repositories;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Abstractions.Interfaces.Services;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Mongo;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Repositories.Sql;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Rest.Filters;
-using Elyspio.Utils.Telemetry.Examples.WebApi.Rest.Middlewares;
-using Elyspio.Utils.Telemetry.MongoDB.Extensions;
-using Elyspio.Utils.Telemetry.Redis.Extensions;
-using Elyspio.Utils.Telemetry.Sql.Extensions;
-using Elyspio.Utils.Telemetry.Technical.Extensions;
-using Serilog;
-using StackExchange.Redis;
+using Elyspio.Utils.Results;
+using Elyspio.Utils.Results.AspNetCore;
+using Elyspio.Utils.Telemetry;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddElyspioTelemetry(); // gtnh-app would add: o => o.Sources.Add("Yarp.ReverseProxy")
 
-builder.Host.UseSerilogWithTelemetry();
-
-builder.Services.AddSqlServer<AppSqlContext>(builder.Configuration.GetConnectionString("sql") ?? builder.Configuration["Sql"]);
-
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITodoService, TodoService>();
-builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITodoRepository, TodoRepository>();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o => { o.CustomOperationIds(op => op.ActionDescriptor.RouteValues["controller"] + op.ActionDescriptor.RouteValues["action"]); });
-
-
-builder.Services.AddScoped<FakeMiddleware>();
-
-builder.Services
-	.AddControllers(o => { o.Filters.Add<HttpExceptionActionFilter>(); })
-	.AddJsonOptions(o => { o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-
-
-#region Redis
-
-// On l'ajoute en tant que singleton afin qu'opentelemetry puisse l'utiliser pour récupérer les traces
-var redisConfiguration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("redis") ?? "localhost:6379");
-redisConfiguration.ClientName = "aura-local-telemetry-webapi";
-
-var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(redisConfiguration);
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnectionMultiplexer);
-builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult(redisConnectionMultiplexer as IConnectionMultiplexer));
-
-#endregion Redis
-
-
-if (builder.Configuration.IsTelemetryEnabled(out var telemetryOptions))
-{
-	var telemetryBuilder = new AppOpenTelemetryBuilder<Program>(telemetryOptions!, builder.Configuration)
-	{
-		Tracing = (tracing, _) => tracing
-			.AddAppMongoInstrumentation()
-			.AddAppSqlClientInstrumentation()
-			.AddAppRedisInstrumentation()
-	};
-
-
-	telemetryBuilder.Build(builder.Services);
-	builder.Services.AddOpenTelemetryJsonConfiguration(builder.Configuration);
-}
-
+builder.Services.AddProblemDetails();
+builder.Services.AddSingleton<BridgeAdapter>();
+builder.Services.AddSingleton<OresService>();
+builder.Services.AddHealthChecks().AddCheck<BridgeHealthCheck>("bridge");
 
 var app = builder.Build();
 
-app.UseOpenTelemetryJsonConfiguration();
+app.UseExceptionHandler(); // unexpected exceptions -> 500 ProblemDetails, marked on the server span
 
-
-app.UseSerilogRequestLogging();
-app.UseMiddleware<FakeMiddleware>();
-
-var scope = app.Services.CreateScope();
-
-var dbContext = scope.ServiceProvider.GetRequiredService<AppSqlContext>();
-dbContext.Database.EnsureCreated();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.MapControllers();
-
-app.Logger.LogInformation($"API started, swagger available at {app.Configuration[WebHostDefaults.ServerUrlsKey]}/swagger/index.html");
+// Endpoints: pass-through, the HTTP mapping comes from the error category.
+app.MapGet("/api/ores/stock/{grid}", async (string grid, OresService ores, CancellationToken ct) => (await ores.GetStock(grid, ct)).ToHttpResult());
+app.MapPut("/api/ores/assignments/{resourceId}", (string resourceId, OresService ores) => ores.Assign(resourceId).ToHttpResult());
+app.MapPost("/api/ores/refresh/{grid}", (string grid, OresService ores) =>
+	ores.Refresh(new RefreshRequest(grid, "s3cr3t-token", new byte[1_000_000], "Fer étiré")).ToHttpResult(run => TypedResults.Accepted($"/api/ores/refresh/{run.Id}", run)));
+app.MapHealthChecks("/health"); // never traced, nor anything it calls (lib default)
 
 app.Run();
+
+// ---- Errors of the app: specialisations of the library categories ----
+
+public sealed record InvalidResourceId(string ResourceId) : Invalid("ores.invalid-resource-id", "Identifiant de ressource invalide.")
+{
+	public override IEnumerable<KeyValuePair<string, object?>> Extensions => [new("resourceId", ResourceId)];
+}
+
+public sealed record ModUnreachable(string Grid) : Unavailable("ores.mod-unreachable", "Le serveur Minecraft ne répond pas.");
+
+public sealed record Stock(string Grid, IReadOnlyDictionary<string, long> Amounts);
+
+public sealed record RefreshRun(Guid Id, string Grid);
+
+/// <summary>Log.F: the token is masked, the payload summarized ("(1000000 bytes)"), the API JSON is unaffected.</summary>
+public sealed record RefreshRequest(string Grid, [property: LogMask] string Token, byte[] Payload, string Label);
+
+// ---- Services ----
+
+public sealed partial class OresService(BridgeAdapter bridge, ILogger<OresService> logger)
+{
+	public async Task<Result<Stock>> GetStock(string grid, CancellationToken cancellationToken)
+	{
+		using var trace = logger.Trace($"{Log.F(grid)}");
+		trace.Activity?.SetTag("ores.grid", grid);
+
+		var read = await bridge.ReadMetrics(grid, cancellationToken);
+
+		// Relay the callee's failure, marking this span too.
+		if (!read.TryGet(out var amounts, out var error)) return trace.Fail(error);
+
+		if (amounts.Count == 0) trace.LogWarning($"grid {grid} is empty");
+		LogTotal(trace, amounts.Values.Sum());
+
+		trace.Exit($"{amounts.Count} entries");
+		return new Stock(grid, amounts);
+	}
+
+	public Result<Unit> Assign(string resourceId)
+	{
+		using var trace = logger.Trace($"{Log.F(resourceId)}");
+
+		if (!resourceId.All(char.IsAsciiLetterOrDigit)) return trace.Fail(new InvalidResourceId(resourceId));
+
+		return Unit.Value;
+	}
+
+	public Result<RefreshRun> Refresh(RefreshRequest request)
+	{
+		using var trace = logger.Trace($"{Log.F(request)}");
+
+		return new RefreshRun(Guid.NewGuid(), request.Grid);
+	}
+
+	/// <summary>Exhaustive switch on the two cases, then on the categories (no default arm).</summary>
+	public static string Describe(Result<Stock> stock) => stock switch
+	{
+		Ok<Stock> ok => $"{ok.Value.Amounts.Count} entries",
+		Err<Error> { Error: Unavailable } => "mod down",
+		Err<Error> err => err.Error.Code,
+	};
+
+	[LoggerMessage(LogLevel.Information, "Total amount {Total}")]
+	private static partial void LogTotal(ILogger logger, long total);
+}
+
+public sealed class BridgeAdapter(ILogger<BridgeAdapter> logger)
+{
+	public async Task<Result<Dictionary<string, long>>> ReadMetrics(string grid, CancellationToken cancellationToken)
+	{
+		using var trace = logger.Trace($"{Log.F(grid)}");
+
+		await Task.Delay(30, cancellationToken); // stands for the HTTP call to the mod (HttpClient span would nest here)
+
+		if (grid == "boom") return trace.Fail(new ModUnreachable(grid));
+		if (grid == "crash") throw new InvalidOperationException("bug"); // the unexpected: an exception, not a Result
+
+		return grid == "empty" ? [] : new Dictionary<string, long> { ["minecraft:iron_ingot"] = 1234, ["gregtech:copper"] = 56 };
+	}
+}
+
+/// <summary>Readiness check calling the bridge: its spans must not appear (instrumentation suppressed for /health).</summary>
+public sealed class BridgeHealthCheck(BridgeAdapter bridge) : IHealthCheck
+{
+	public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+	{
+		var read = await bridge.ReadMetrics("main", cancellationToken);
+		return read.IsSuccess ? HealthCheckResult.Healthy() : HealthCheckResult.Unhealthy();
+	}
+}

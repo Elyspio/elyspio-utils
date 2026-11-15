@@ -1,15 +1,21 @@
-name: Publish Elyspio telemetry packages
+name: Publish Elyspio .NET packages
 
 on:
   push:
     branches: [main]
     paths:
       - "elyspio-utils-telemetry/**"
+      - "elyspio-utils-results/**"
+      - ".github/workflows/publish-telemetry.yml"
+  pull_request:
+    paths:
+      - "elyspio-utils-telemetry/**"
+      - "elyspio-utils-results/**"
       - ".github/workflows/publish-telemetry.yml"
   workflow_dispatch:
     inputs:
       publish:
-        description: "Publish packages after validation"
+        description: "Publish packages after validation (from any branch: prerelease versions)"
         required: true
         default: false
         type: boolean
@@ -18,17 +24,9 @@ permissions:
   contents: read
 
 jobs:
-  build-and-publish:
-    name: Build and publish new NuGet versions
+  build:
+    name: Build, test and pack
     runs-on: ubuntu-latest
-    environment: release
-    permissions:
-      contents: read
-      id-token: write
-
-    defaults:
-      run:
-        working-directory: elyspio-utils-telemetry
 
     steps:
       - uses: actions/checkout@v7
@@ -38,7 +36,15 @@ jobs:
         with:
           global-json-file: elyspio-utils-telemetry/global.json
 
-      - name: Restore, test, and build
+      - name: Results - restore, test and build
+        working-directory: elyspio-utils-results
+        run: |
+          dotnet restore Elyspio.Utils.Results.slnx
+          dotnet test --solution Elyspio.Utils.Results.slnx --no-restore --configuration Release
+          dotnet build Elyspio.Utils.Results.slnx --no-restore --configuration Release
+
+      - name: Telemetry - restore, test and build
+        working-directory: elyspio-utils-telemetry
         run: |
           dotnet restore Elyspio.Utils.Telemetry.slnx
           dotnet test --solution Elyspio.Utils.Telemetry.slnx --no-restore --configuration Release
@@ -46,10 +52,38 @@ jobs:
 
       - name: Pack publishable packages
         run: |
-          dotnet pack Packages/Core/Elyspio.Utils.Telemetry.csproj --no-build --configuration Release --output artifacts
-          dotnet pack Packages/Sql/Elyspio.Utils.Telemetry.Sql.csproj --no-build --configuration Release --output artifacts
-          dotnet pack Packages/Redis/Elyspio.Utils.Telemetry.Redis.csproj --no-build --configuration Release --output artifacts
-          dotnet pack Packages/MongoDB/Elyspio.Utils.Telemetry.MongoDB.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-results/Packages/Core/Elyspio.Utils.Results.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-results/Packages/AspNetCore/Elyspio.Utils.Results.AspNetCore.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-telemetry/Packages/Core/Elyspio.Utils.Telemetry.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-telemetry/Packages/Sql/Elyspio.Utils.Telemetry.Sql.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-telemetry/Packages/Redis/Elyspio.Utils.Telemetry.Redis.csproj --no-build --configuration Release --output artifacts
+          dotnet pack elyspio-utils-telemetry/Packages/MongoDB/Elyspio.Utils.Telemetry.MongoDB.csproj --no-build --configuration Release --output artifacts
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: artifacts/
+
+  publish:
+    name: Publish new NuGet versions
+    needs: build
+    if: github.event_name == 'push' || inputs.publish == true
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: artifacts
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 11.0.x
 
       - name: Authenticate with NuGet trusted publishing
         uses: NuGet/login@v1
@@ -57,6 +91,8 @@ jobs:
         with:
           user: Elyspio
 
+      # Results first: Telemetry depends on it.
       - name: Publish versions not already on NuGet.org
-        if: github.event_name == 'push' || inputs.publish == true
-        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+        run: |
+          dotnet nuget push "artifacts/Elyspio.Utils.Results*.nupkg" --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+          dotnet nuget push "artifacts/Elyspio.Utils.Telemetry*.nupkg" --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
