@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -44,6 +45,24 @@ public sealed class TelemetryExtensionsTests
 		var response = await app.GetTestClient().GetAsync("/health", TestContext.Current.CancellationToken);
 
 		response.Headers.Contains(TraceHeaders.TraceId).ShouldBeFalse();
+	}
+
+	[Fact]
+	public async Task A_span_left_by_an_exception_is_marked_as_failed()
+	{
+		await using var app = await Start("http://localhost:4318");
+		using var source = new ActivitySource("Elyspio.Tests.Unwinding");
+		Activity? activity = null;
+
+		try
+		{
+			using (activity = source.StartActivity("job")) throw new InvalidOperationException("boom");
+		}
+		catch (InvalidOperationException)
+		{
+		}
+
+		activity.ShouldNotBeNull().Status.ShouldBe(ActivityStatusCode.Error);
 	}
 
 	[Fact]

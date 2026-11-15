@@ -6,7 +6,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<PackageId>Elyspio.Utils.Telemetry</PackageId>
-		<Version>3.0.0-preview.2</Version>
+		<Version>3.0.0-preview.3</Version>
 		<PackageDescription>OpenTelemetry bootstrap configured by the standard OTEL_* settings, Serilog logs and composition-based trace scopes</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>

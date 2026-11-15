@@ -93,7 +93,9 @@ public static class TelemetryExtensions
 		builder.Services.AddOpenTelemetry()
 			.WithTracing(tracing =>
 			{
-				tracing.AddAspNetCoreInstrumentation(o => o.Filter = context => !IsUntraced(context.Request.Path, untraced))
+				// A span closed by an exception passing through it (a job, a trace scope) is marked as failed.
+				tracing.SetErrorStatusOnException()
+					.AddAspNetCoreInstrumentation(o => o.Filter = context => !IsUntraced(context.Request.Path, untraced))
 					.AddHttpClientInstrumentation()
 					.AddSource([.. options.Sources])
 					.AddOtlpExporter();

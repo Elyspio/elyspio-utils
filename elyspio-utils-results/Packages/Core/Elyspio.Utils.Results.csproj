@@ -6,7 +6,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<PackageId>Elyspio.Utils.Results</PackageId>
-		<Version>1.0.0-preview.2</Version>
+		<Version>1.0.0-preview.3</Version>
 		<PackageDescription>Result type built on C# 15 unions, with a closed hierarchy of HTTP-mappable errors</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>

@@ -5,7 +5,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PackageId>Elyspio.Utils.Telemetry.Sql</PackageId>
-		<Version>3.0.0-preview.2</Version>
+		<Version>3.0.0-preview.3</Version>
 		<PackageDescription>Bootstrap OpenTelemetry instrumentation/exporter</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<RootNamespace>Elyspio.Utils.Telemetry.Sql</RootNamespace>
