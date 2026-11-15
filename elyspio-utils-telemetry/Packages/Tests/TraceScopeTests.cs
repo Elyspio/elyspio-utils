@@ -59,6 +59,23 @@ public sealed class TraceScopeTests : IDisposable
 
 			trace.LogError(new InvalidOperationException("bug"), $"failed");
 		}
+
+		public void Retry()
+		{
+			using var trace = logger.Trace();
+
+			trace.LogWarning(new TimeoutException("slow"), "Attempt {Attempt} failed, retrying", 1);
+		}
+	}
+
+	[Fact]
+	public void Warning_with_an_exception_records_it_without_failing_the_span()
+	{
+		new Service(new TestLogger<Service>()).Retry();
+
+		var span = Spans("Retry").Single();
+		span.Status.ShouldBe(ActivityStatusCode.Unset);
+		span.Events.ShouldContain(e => e.Name == "exception");
 	}
 
 	[Fact]

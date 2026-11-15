@@ -71,7 +71,7 @@ public sealed class OresService(BridgeAdapter bridge, ILogger<OresService> logge
 - `logger.Trace(...)` opens a span named `{Class}.{Method}` and logs `Enter` with the arguments. Disposing the scope logs `Exit` with the elapsed time. Both are logged at Debug by default; pass a level with `logger.Trace(LogLevel.Information, $"...")`.
 - **Allocations**: interpolated string handlers are used throughout. When the level is disabled and no listener records the span, the holes are not evaluated and nothing is allocated.
 - **`TraceScope` is an `ILogger`**: `LogXxx` extensions and `[LoggerMessage]` methods work on it, so it is a drop-in replacement for the class logger.
-- **Failure**: `return trace.Fail(error);` marks the span (status `Error`, `error.type` = error code) and the `Exit` log. `return trace.Return(result);` does the same for a `Result` relayed as is. An exception logged through the scope (`trace.LogError(ex, $"...")`) is recorded on the span.
+- **Failure**: `return trace.Fail(error);` marks the span (status `Error`, `error.type` = error code) and the `Exit` log. `return trace.Return(result);` does the same for a `Result` relayed as is. An exception logged through the scope is recorded on the span; logged as an error (`trace.LogError(ex, $"...")`) it also marks the span as failed, a warning about a handled failure does not.
 - **`trace.Exit($"...")`** sets the content of the `Exit` log and the `code.exit` tag.
 - **ELY0001**: a warning when a method that holds a `TraceScope` returns an error without `trace.Fail`. It comes with a code fix. Not checked: an error returned from a `?:` or `switch` expression arm.
 

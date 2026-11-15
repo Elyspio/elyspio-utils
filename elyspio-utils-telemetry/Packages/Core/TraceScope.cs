@@ -149,7 +149,7 @@ public sealed class TraceScope : ILogger, IDisposable
 
 		// The log already carries trace_id/span_id: copying it on the span is opt-in (formats a second time).
 		if (TelemetrySettings.MirrorLogsToSpanEvents && Recording) Activity!.AddEvent(LogEvent(logLevel, formatter(state, exception)));
-		if (exception is not null) RecordException(exception);
+		if (exception is not null) RecordException(exception, logLevel);
 	}
 
 	private void Write<TLevel>(LogLevel level, Exception? exception, ref TraceLogHandler<TLevel> message) where TLevel : ITraceLevel
@@ -160,15 +160,18 @@ public sealed class TraceScope : ILogger, IDisposable
 		_logger.Log(level, default, text, exception, static (s, _) => s);
 
 		if (TelemetrySettings.MirrorLogsToSpanEvents && Recording) Activity!.AddEvent(LogEvent(level, text));
-		if (exception is not null) RecordException(exception);
+		if (exception is not null) RecordException(exception, level);
 	}
 
-	/// <summary>An exception logged explicitly through the scope is recorded on the span, which is marked as failed.</summary>
-	private void RecordException(Exception exception)
+	/// <summary>
+	///     An exception logged through the scope is recorded on the span. Logged as an error, it marks the span as failed;
+	///     below (a warning about a handled failure, a retry), the operation may still succeed and the status is left alone.
+	/// </summary>
+	private void RecordException(Exception exception, LogLevel level)
 	{
 		if (!Recording) return;
 		Activity!.AddException(exception);
-		Activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
+		if (level >= LogLevel.Error) Activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
 	}
 
 	private static ActivityEvent LogEvent(LogLevel level, string message) => new(message, tags: new() { ["log.severity"] = level.ToString() });
