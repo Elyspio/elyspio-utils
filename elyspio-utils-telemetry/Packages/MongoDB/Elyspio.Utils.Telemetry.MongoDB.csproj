@@ -5,7 +5,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PackageId>Elyspio.Utils.Telemetry.MongoDB</PackageId>
-		<Version>3.0.0-preview.1</Version>
+		<Version>3.0.0-preview.2</Version>
 		<PackageDescription>Bootstrap OpenTelemetry instrumentation/exporter</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>

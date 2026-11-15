@@ -68,6 +68,21 @@ public sealed class ResultHttpExtensionsTests
 	}
 
 	[Fact]
+	public void Controllers_get_the_problem_as_an_object_result()
+	{
+		var error = new Invalid("form.invalid", "Invalid form.") { Fields = new Dictionary<string, string[]> { ["name"] = ["Required."] } };
+		Result<int> value = 1;
+		Result<Unit> unit = Unit.Value;
+
+		var problem = error.ToActionResult().ShouldBeAssignableTo<ObjectResult>()!;
+
+		problem.StatusCode.ShouldBe(400);
+		problem.Value.ShouldBeOfType<HttpValidationProblemDetails>().Errors["name"].ShouldBe(["Required."]);
+		value.ToActionResult().Value.ShouldBe(1);
+		unit.ToActionResult().ShouldBeOfType<NoContentResult>();
+	}
+
+	[Fact]
 	public void Success_gives_200_204_or_the_custom_result()
 	{
 		Result<int> value = 1;

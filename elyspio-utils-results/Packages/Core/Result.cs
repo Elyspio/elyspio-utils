@@ -131,6 +131,8 @@ public readonly struct Result<T> : IUnion
 
 	public static implicit operator Result<T>(Failed failed) => new(new Err<Error>(failed.Error));
 
+	public static implicit operator Result<T>(Failed<Error> failed) => new(new Err<Error>(failed.Error));
+
 	public static implicit operator Result<T, Error>(Result<T> result) => result._inner;
 
 	public static implicit operator Result<T>(Result<T, Error> result) => new(result);

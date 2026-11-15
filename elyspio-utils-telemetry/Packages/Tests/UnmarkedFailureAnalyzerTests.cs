@@ -120,12 +120,54 @@ public sealed class UnmarkedFailureAnalyzerTests
 		diagnostics.ShouldBeEmpty();
 	}
 
-	[Theory]
-	[InlineData("new Missing()", "trace.Fail(new Missing())")]
-	[InlineData("new Err<Error>(error)", "trace.Fail(error)")]
-	public void Code_fix_wraps_the_error(string expression, string expected)
+	[Fact]
+	public async Task The_scope_of_a_closed_block_is_not_used()
 	{
-		var wrapped = UnmarkedFailureCodeFix.Wrap(SyntaxFactory.ParseExpression(expression), "trace");
+		var diagnostics = await Analyze("""
+			public Result<int> Find(bool flag)
+			{
+				if (flag)
+				{
+					using var first = logger.Trace();
+				}
+
+				using var second = logger.Trace();
+				return new Missing();
+			}
+			""");
+
+		diagnostics.Single().GetMessage().ShouldContain("second.Fail");
+	}
+
+	[Fact]
+	public async Task An_error_returned_as_the_success_value_is_not_reported()
+	{
+		var diagnostics = await Analyze("""
+			public Result<Error, string> Describe()
+			{
+				using var trace = logger.Trace();
+				return new Missing();
+			}
+
+			public Result<int, Error> Generic()
+			{
+				using var trace = logger.Trace();
+				return trace.Fail(new Missing());
+			}
+			""");
+
+		diagnostics.ShouldBeEmpty();
+	}
+
+	[Theory]
+	[InlineData("new Missing()", false, "trace.Fail(new Missing())")]
+	[InlineData("new Err<Error>(error)", false, "trace.Fail(error)")]
+	[InlineData("new Elyspio.Utils.Results.Err<Error>(error)", false, "trace.Fail(error)")]
+	[InlineData("err", true, "trace.Fail(err.Error)")]
+	[InlineData("Make()", true, "trace.Fail((Make()).Error)")]
+	public void Code_fix_wraps_the_error(string expression, bool errCase, string expected)
+	{
+		var wrapped = UnmarkedFailureCodeFix.Wrap(SyntaxFactory.ParseExpression(expression), "trace", errCase);
 
 		wrapped.NormalizeWhitespace().ToFullString().ShouldBe(expected);
 	}

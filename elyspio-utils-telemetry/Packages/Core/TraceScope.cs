@@ -57,10 +57,10 @@ public sealed class TraceScope : ILogger, IDisposable
 	/// </summary>
 	/// <remarks>Preferred over the generic overload, which would otherwise win for any Error subtype (exact type match).</remarks>
 	[OverloadResolutionPriority(1)]
-	public Failed Fail(Error error)
+	public Failed<Error> Fail(Error error)
 	{
 		Mark(error.Code);
-		return new Failed(error);
+		return new Failed<Error>(error);
 	}
 
 	/// <inheritdoc cref="Fail(Error)" />

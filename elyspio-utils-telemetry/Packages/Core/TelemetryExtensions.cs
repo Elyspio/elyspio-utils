@@ -65,7 +65,7 @@ public static class TelemetryExtensions
 	public static IHostApplicationBuilder AddElyspioTelemetry(this IHostApplicationBuilder builder, Action<ElyspioTelemetryOptions>? configure = null)
 	{
 		var options = new ElyspioTelemetryOptions();
-		var root = System.Reflection.Assembly.GetEntryAssembly()!.GetName().Name!.Split('.')[0];
+		var root = builder.Environment.ApplicationName.Split('.')[0];
 		options.Sources.AddRange([root, $"{root}.*"]);
 		configure?.Invoke(options);
 		TelemetrySettings.MirrorLogsToSpanEvents = options.MirrorLogsToSpanEvents;

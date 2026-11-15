@@ -106,6 +106,13 @@ internal sealed class LogContractRules(HashSet<(Type Type, string Property)> ign
 	{
 		if (type.Kind != JsonTypeInfoKind.Object) return;
 
+		// A [LogIgnore] type logged directly (not as a property) is written as an empty object.
+		if (type.Type.IsDefined(typeof(LogIgnoreAttribute), false))
+		{
+			type.Properties.Clear();
+			return;
+		}
+
 		for (var i = type.Properties.Count - 1; i >= 0; i--)
 		{
 			var property = type.Properties[i];
@@ -210,10 +217,10 @@ internal sealed class JsonScratch
 			writer.Flush();
 			return true;
 		}
-		catch (Exception exception) when (exception is JsonException or NotSupportedException or InvalidOperationException or ArgumentException)
+		catch (Exception exception)
 		{
-			// Logging never throws. Too deep (a cycle): keep what was written, shown cut ("…").
-			if (exception is JsonException && TryKeepPartial(writer)) return false;
+			// Logging never throws. Too deep (a cycle) or a value too big for the cap: keep what was written, shown cut ("…").
+			if (exception is JsonException or CappedBufferWriter.OversizedValueException && TryKeepPartial(writer)) return false;
 
 			// Unsupported type, AOT without metadata, a getter that throws…: an error marker.
 			_buffer.Reset(settings.MaxLength);
@@ -324,6 +331,10 @@ internal sealed class CappedBufferWriter : IBufferWriter<byte>
 
 	private Memory<byte> Chunk(int sizeHint)
 	{
+		// The writer asks for a whole value at once (a 4 M characters string asks ~12 MB): past the cap plus a margin,
+		// the value is dropped instead of buffered.
+		if (sizeHint > _cap + RetainedMax) throw new OversizedValueException();
+
 		sizeHint = Math.Max(sizeHint, MinChunk);
 
 		_inOverflow = _written >= _cap;
@@ -342,6 +353,9 @@ internal sealed class CappedBufferWriter : IBufferWriter<byte>
 
 		return _buffer.AsMemory(_written);
 	}
+
+	/// <summary>Stops the serialization of a value bigger than the cap; caught by <see cref="JsonScratch.Serialize{T}" />.</summary>
+	internal sealed class OversizedValueException() : Exception("Value too big for the log field cap.");
 
 	private static void Swap(ref byte[]? field, byte[]? value)
 	{

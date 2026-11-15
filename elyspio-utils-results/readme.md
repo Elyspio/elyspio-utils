@@ -32,7 +32,7 @@ var text = result switch
 - `TryGet(out value, out error)` tests and unpacks in one step: `if (!read.TryGet(out var amounts, out var error)) return trace.Fail(error);`
 - `Map` and `Bind` are synchronous. `Unit.Value` is the success of an operation that returns nothing (`Result<Unit>`).
 - `default(Result<T>)` is neither a success nor a failure: `TryGet`, `Map` and `Bind` throw on it.
-- `Failed` / `Failed<TError>`, returned by `trace.Fail(...)` in Elyspio.Utils.Telemetry, convert to any `Result` without naming `T`.
+- `Failed` / `Failed<TError>`, returned by `trace.Fail(...)` in Elyspio.Utils.Telemetry, convert to any `Result` without naming `T`. `trace.Fail(error)` gives a `Failed<Error>` (`Result<T>` and `Result<T, Error>`); for a method returning `Result<T, MyError>` with `MyError : Error`, name the type: `trace.Fail<MyError>(error)`.
 - Name clash: `Ok<T>` also exists in `Microsoft.AspNetCore.Http.HttpResults`. Do not import both namespaces in the same file.
 
 ## Errors
@@ -76,4 +76,4 @@ app.MapPost("/api/ores/refresh/{grid}", (string grid, OresService ores) => ores.
 
 - `ToHttpResult()` maps a success to 200 with the value (204 for `Result<Unit>`). The overload `ToHttpResult(onSuccess)` builds any other success response (201, 202, …).
 - A failure becomes a ProblemDetails whose status comes from the category, with `type`, `detail` and the `code` extension. `Invalid` with `Fields` gives a ValidationProblemDetails. ASP.NET adds `traceId` (`AddProblemDetails`).
-- MVC controllers can return the `IResult` directly from an action: `public async Task<IResult> Get(...) => (await service.Get(...)).ToHttpResult();`. `error.ToProblem()` is also available on its own.
+- MVC controllers use `ToActionResult()` and keep their `ActionResult<T>` return type (the OpenAPI document keeps the success body): `public async Task<ActionResult<Run>> Get(...) => (await service.Get(...)).ToActionResult();`. Returning the `IResult` of `ToHttpResult()` from a controller loses the validation `errors` (the MVC problem writer serializes the base `ProblemDetails` type). `error.ToProblem()` and `error.ToActionResult()` are also available on their own.

@@ -26,7 +26,7 @@ builder.AddElyspioTelemetry(); // or: o => o.Sources.Add("Yarp.ReverseProxy")
 
 - **Logs**: Serilog, always. Console output, levels from the `Serilog` section of the configuration. Logs are exported to OTLP through the Serilog sink when an endpoint is set.
 - **Traces and metrics**: exported only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Covers ASP.NET Core, HttpClient, the `System.Runtime` meter and the app's own `ActivitySource`s (the entry assembly root, `GtnhApp` + `GtnhApp.*`).
-- **Configuration**: the standard keys, read from `IConfiguration` (environment variables or appsettings): `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, and so on. Aspire sets them for you; in Kubernetes the chart sets them:
+- **Configuration**: the standard keys, read from `IConfiguration` (environment variables or appsettings): `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, and so on. Only the generic `OTEL_EXPORTER_OTLP_*` keys are supported: the per-signal ones (`OTEL_EXPORTER_OTLP_TRACES_*`, `_METRICS_*`, `_LOGS_*`) are not applied. One host per process: the options (`MirrorLogsToSpanEvents`, `LogFields`) are process-wide. Aspire sets them for you; in Kubernetes the chart sets them:
 
 ```yaml
 env:
@@ -73,7 +73,7 @@ public sealed class OresService(BridgeAdapter bridge, ILogger<OresService> logge
 - **`TraceScope` is an `ILogger`**: `LogXxx` extensions and `[LoggerMessage]` methods work on it, so it is a drop-in replacement for the class logger.
 - **Failure**: `return trace.Fail(error);` marks the span (status `Error`, `error.type` = error code) and the `Exit` log. `return trace.Return(result);` does the same for a `Result` relayed as is. An exception logged through the scope (`trace.LogError(ex, $"...")`) is recorded on the span.
 - **`trace.Exit($"...")`** sets the content of the `Exit` log and the `code.exit` tag.
-- **ELY0001**: a warning when a method that holds a `TraceScope` returns an error without `trace.Fail`. It comes with a code fix.
+- **ELY0001**: a warning when a method that holds a `TraceScope` returns an error without `trace.Fail`. It comes with a code fix. Not checked: an error returned from a `?:` or `switch` expression arm.
 
 ### Log.F
 

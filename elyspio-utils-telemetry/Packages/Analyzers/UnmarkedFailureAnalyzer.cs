@@ -56,6 +56,8 @@ public sealed class UnmarkedFailureAnalyzer : DiagnosticAnalyzer
 		else if (SymbolEqualityComparer.Default.Equals(definition, types.Result2)) errorType = target.TypeArguments[1];
 		else return;
 
+		// The conversion the compiler chose tells the case: from T is a success, even when T is an Error (Result<Error, string>).
+		if (conversion.OperatorMethod?.OriginalDefinition.Parameters is { Length: 1 } parameters && parameters[0].Type is ITypeParameterSymbol { Ordinal: 0 }) return;
 		if (!IsError(conversion.Operand.Type, errorType, types)) return;
 
 		var scope = FindScope(context.Operation.Syntax, context.Operation.SemanticModel!, types.TraceScope, context.CancellationToken);
@@ -80,23 +82,30 @@ public sealed class UnmarkedFailureAnalyzer : DiagnosticAnalyzer
 		return false;
 	}
 
-	/// <summary>The TraceScope local declared before the return, in the same function (not in an enclosing one).</summary>
+	/// <summary>
+	///     The nearest TraceScope local visible at the return and declared before it, in the same function (not in an
+	///     enclosing one, nor in a block already closed).
+	/// </summary>
 	private static ILocalSymbol? FindScope(SyntaxNode returnSyntax, SemanticModel model, INamedTypeSymbol traceScope, CancellationToken cancellationToken)
 	{
 		var function = returnSyntax.Ancestors().FirstOrDefault(IsFunction);
 		if (function is null) return null;
 
-		foreach (var declarator in function.DescendantNodes(node => node == function || !IsFunction(node)).OfType<VariableDeclaratorSyntax>())
+		ILocalSymbol? nearest = null;
+		var nearestStart = -1;
+		foreach (var local in model.LookupSymbols(returnSyntax.SpanStart).OfType<ILocalSymbol>())
 		{
-			if (declarator.SpanStart > returnSyntax.SpanStart) break;
+			if (!SymbolEqualityComparer.Default.Equals(local.Type, traceScope)) continue;
 
-			if (model.GetDeclaredSymbol(declarator, cancellationToken) is ILocalSymbol local && SymbolEqualityComparer.Default.Equals(local.Type, traceScope))
-			{
-				return local;
-			}
+			var declaration = local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(cancellationToken);
+			if (declaration is null || declaration.SpanStart > returnSyntax.SpanStart || declaration.SpanStart < nearestStart) continue;
+			if (declaration.Ancestors().FirstOrDefault(IsFunction) != function) continue;
+
+			nearest = local;
+			nearestStart = declaration.SpanStart;
 		}
 
-		return null;
+		return nearest;
 	}
 
 	private static bool IsFunction(SyntaxNode node) => node is BaseMethodDeclarationSyntax or AccessorDeclarationSyntax or LocalFunctionStatementSyntax
