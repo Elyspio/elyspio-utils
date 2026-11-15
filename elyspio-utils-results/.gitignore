@@ -1,0 +1,9 @@
+﻿.idea
+**/bin
+**/obj
+Examples/Databases/mongo
+Examples/Databases/sql
+Packages/output
+Examples/Databases/rabbitmq
+.vs
+*.sln.DotSettings.user

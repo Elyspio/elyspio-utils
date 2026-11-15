@@ -4,8 +4,9 @@
 
 This repository contains independently built shared packages; there is no root-level build.
 
-- `elyspio-utils-telemetry/` contains .NET 10 OpenTelemetry libraries. Reusable modules are under `Packages/` (`Core`, `MongoDB`, `Redis`, and `Sql`); tests live beside the module in `Packages/Sql.Tests/`.
-- `elyspio-utils-telemetry/Examples/WebApi/` is the ASP.NET Core reference application. `Examples/Databases/docker-compose.yml` provides local SQL Server, MongoDB, and Redis.
+- `elyspio-utils-telemetry/` contains .NET 11 OpenTelemetry libraries. Reusable modules are under `Packages/` (`Core`, `MongoDB`, `Redis`, `Sql`, and the `Analyzers` shipped inside the Core package); tests live in `Packages/Tests/` and `Packages/Sql.Tests/`.
+- `elyspio-utils-results/` contains the .NET 11 `Result` libraries (`Packages/Core`, `Packages/AspNetCore`, tests in `Packages/Tests/`). The Telemetry Core package references it.
+- `elyspio-utils-telemetry/Examples/WebApi/` is the ASP.NET Core reference application, run under Aspire by `Examples/AppHost/`.
 - `vite-eslint-config/` is the TypeScript/Vite+ configuration package. Source is in `src/`, with release preparation scripts in `scripts/`.
 - `deploy/` contains PowerShell packaging and publishing helpers. Read its README before publishing.
 
@@ -16,8 +17,7 @@ Run commands from the relevant package directory:
 ```bash
 dotnet build Elyspio.Utils.Telemetry.slnx
 dotnet test --solution Elyspio.Utils.Telemetry.slnx
-dotnet run --project Examples/WebApi/Elyspio.Utils.Telemetry.Examples.WebApi.csproj
-docker compose -f Examples/Databases/docker-compose.yml up -d
+aspire run
 ```
 
 Use `pnpm install` in `vite-eslint-config/`, then `pnpm check` for linting/format checks and `pnpm build` to create the distributable package. Use the lockfile’s pinned pnpm version (`12.5.1`).

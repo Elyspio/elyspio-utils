@@ -1,15 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<PackageId>Elyspio.Utils.Telemetry</PackageId>
-		<Version>2.1.0</Version>
-		<PackageDescription>Bootstrap OpenTelemetry instrumentation/exporter</PackageDescription>
+		<Version>3.0.0</Version>
+		<PackageDescription>OpenTelemetry bootstrap configured by the standard OTEL_* settings, Serilog logs and composition-based trace scopes</PackageDescription>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
@@ -18,22 +16,30 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
-		<PackageReference Include="Macross.OpenTelemetry.Extensions" Version="1.0.0-beta6" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="OpenTelemetry" Version="1.19.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
 		<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.19.0-rc.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\elyspio-utils-results\Packages\Core\Elyspio.Utils.Results.csproj" />
+		<ProjectReference Include="..\Analyzers\Elyspio.Utils.Telemetry.Analyzers.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+	</ItemGroup>
+
+	<!-- ELY0001 ships in the package: every consumer gets the analyzer and its code fix. -->
+	<ItemGroup>
+		<None Include="..\Analyzers\bin\$(Configuration)\netstandard2.0\Elyspio.Utils.Telemetry.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\..\readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Elyspio.Utils.Telemetry.Tests" />
 	</ItemGroup>
 
 </Project>

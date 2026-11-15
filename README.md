@@ -7,7 +7,8 @@ This repository groups Elyspio shared packages and the local scripts used to pub
 | Path | Purpose | Documentation |
 | --- | --- | --- |
 | `vite-eslint-config` | Shared Vite+ defaults for React, TypeScript, Oxlint and Oxfmt projects. | [vite-eslint-config/README.md](./vite-eslint-config/README.md) |
-| `elyspio-utils-telemetry` | .NET 10 OpenTelemetry bootstrap packages for ASP.NET Core, plus an example app. | [elyspio-utils-telemetry/readme.md](./elyspio-utils-telemetry/readme.md) |
+| `elyspio-utils-telemetry` | .NET 11 OpenTelemetry bootstrap and trace scopes for ASP.NET Core, plus an example app. | [elyspio-utils-telemetry/readme.md](./elyspio-utils-telemetry/readme.md) |
+| `elyspio-utils-results` | .NET 11 `Result` type (C# 15 unions), error categories and their ProblemDetails mapping. | [elyspio-utils-results/readme.md](./elyspio-utils-results/readme.md) |
 | `deploy` | PowerShell helpers for publishing the packages in this repository. | [deploy/README.md](./deploy/README.md) |
 
 ## Working in this repo
@@ -15,7 +16,7 @@ This repository groups Elyspio shared packages and the local scripts used to pub
 There is no single top-level build for the whole repository. Work from the package you want to change and use that package's own commands and documentation:
 
 - `vite-eslint-config` for the JavaScript package.
-- `elyspio-utils-telemetry` for the .NET packages.
+- `elyspio-utils-results` and `elyspio-utils-telemetry` for the .NET packages (Telemetry references Results).
 - `deploy` for local publishing helpers.
 
 ## Publishing

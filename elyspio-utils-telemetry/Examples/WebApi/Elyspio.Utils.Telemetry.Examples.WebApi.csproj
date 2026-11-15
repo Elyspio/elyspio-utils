@@ -1,55 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<InvariantGlobalization>true</InvariantGlobalization>
-		<LangVersion>preview</LangVersion>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.12" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
-		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-		<PackageReference Include="MongoDB.Driver" Version="3.12.0" />
-		<PackageReference Include="Mapster" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
-	</ItemGroup>
-	<PropertyGroup>
-		<InvariantGlobalization>false</InvariantGlobalization>
-	</PropertyGroup>
-
-
-	<ItemGroup>
-		<Folder Include="Abstractions\" />
-		<Folder Include="Repositories\" />
-	</ItemGroup>
-
-
-
-	<ItemGroup>
-	  <None Update="Certs\*">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
-
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\Packages\Core\Elyspio.Utils.Telemetry.csproj" />
-	  <ProjectReference Include="..\..\Packages\MongoDB\Elyspio.Utils.Telemetry.MongoDB.csproj" />
-	  <ProjectReference Include="..\..\Packages\Redis\Elyspio.Utils.Telemetry.Redis.csproj" />
-	  <ProjectReference Include="..\..\Packages\Sql\Elyspio.Utils.Telemetry.Sql.csproj" />
-	</ItemGroup>
-
-
-
-	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="Connected Services\ApiSante.Rest\ApiSante.Rest.nswag.json" />
-	  <_ContentIncludedByDefault Remove="Connected Services\ApiSante.Rest\ConnectedService.json" />
+		<ProjectReference Include="..\..\Packages\Core\Elyspio.Utils.Telemetry.csproj" />
+		<ProjectReference Include="..\..\Packages\Analyzers\Elyspio.Utils.Telemetry.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\..\elyspio-utils-results\Packages\AspNetCore\Elyspio.Utils.Results.AspNetCore.csproj" />
 	</ItemGroup>
 
 </Project>

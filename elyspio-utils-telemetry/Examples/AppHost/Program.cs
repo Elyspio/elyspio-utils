@@ -1,17 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var redis = builder.AddRedis("redis");
-var mongo = builder.AddMongoDB("mongodb")
-	.WithImageTag("8.0.4")
-	.AddDatabase("mongo");
-var sql = builder.AddSqlServer("sqlserver").AddDatabase("sql");
-
+// Aspire injects OTEL_EXPORTER_OTLP_ENDPOINT/PROTOCOL/HEADERS and OTEL_SERVICE_NAME: traces, metrics and logs land in the dashboard.
 builder.AddProject<Projects.Elyspio_Utils_Telemetry_Examples_WebApi>("webapi")
-	.WithReference(redis)
-	.WithReference(mongo)
-	.WithReference(sql)
-	.WaitFor(redis)
-	.WaitFor(mongo)
-	.WaitFor(sql);
+	.WithHttpHealthCheck("/health");
 
 builder.Build().Run();

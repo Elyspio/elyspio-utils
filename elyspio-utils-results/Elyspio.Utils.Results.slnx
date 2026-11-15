@@ -1,0 +1,7 @@
+<Solution>
+	<Project Path="Packages\Core\Elyspio.Utils.Results.csproj" />
+	<Project Path="Packages\AspNetCore\Elyspio.Utils.Results.AspNetCore.csproj" />
+	<Folder Name="/Tests/">
+		<Project Path="Packages\Tests\Elyspio.Utils.Results.Tests.csproj" />
+	</Folder>
+</Solution>
