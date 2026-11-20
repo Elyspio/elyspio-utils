@@ -20,7 +20,7 @@ dotnet test --solution Elyspio.Utils.Telemetry.slnx
 aspire run
 ```
 
-Use `pnpm install` in `vite-eslint-config/`, then `pnpm check` for linting/format checks and `pnpm build` to create the distributable package. Use the lockfile’s pinned pnpm version (`12.5.1`).
+Use `pnpm install` in `vite-eslint-config/`, then `pnpm check` for linting/format checks and `pnpm build` to create the distributable package. Use the lockfile’s pinned pnpm version (`12.21.0`).
 
 ## Coding Style & Naming Conventions
 
