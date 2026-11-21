@@ -1,6 +1,6 @@
 # @elyspio/vite-eslint-config
 
-Base partagée pour les projets `Vite+` (≥ 0.3) avec React, TypeScript 7, Oxlint et Oxfmt.
+Base partagée pour les projets `Vite+` (≥ 1.7) avec React, TypeScript 7, Oxlint et Oxfmt.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Base partagée pour les projets `Vite+` (≥ 0.3) avec React, TypeScript 7, Oxli
 pnpm add -D vite-plus @elyspio/vite-eslint-config
 ```
 
-Node ≥ 22.18 requis.
+Node ≥ 26 requis.
 
 ## Utilisation
 
